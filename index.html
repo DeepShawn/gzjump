@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#c4e8df">
+<meta name="description" content="一颗果子，跳过整片海。单文件离线跳跃小游戏，支持鼠标、触屏与键盘。">
+<title>果子跳跳 · Fruit Hop</title>
+<style>
+:root{--ink:#193f36;--muted:#617e73;--green:#245c45;--lime:#e2ef99;--paper:#fbfcf3;--line:rgba(35,76,61,.12);--shadow:0 18px 65px rgba(30,86,66,.13);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);font-synthesis:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#c3e5dc}body{user-select:none;-webkit-user-select:none;overscroll-behavior:none}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:0}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #77a576;outline-offset:4px}button:disabled{opacity:.45;cursor:default}button,svg{flex-shrink:0}button{touch-action:manipulation}svg{display:block}button:active{transform:translateY(1px)}[hidden]{display:none!important}
+#sea{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:none;outline:none}
+.app-header{position:fixed;left:max(32px,env(safe-area-inset-left));right:max(32px,env(safe-area-inset-right));top:max(26px,env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center;gap:16px;z-index:5;pointer-events:none}.brand{display:flex;align-items:center;gap:11px;pointer-events:auto;background:none;padding:0;text-align:left}.brand-mark{width:43px;height:43px;border-radius:15px;background:var(--green);display:grid;place-items:center;box-shadow:0 5px 12px #265b4410}.brand-cn{font-size:19px;letter-spacing:1px;font-weight:800}.brand-en{display:block;font-size:9px;letter-spacing:3px;font-weight:600;opacity:.58;margin-top:4px}.header-actions{display:flex;align-items:center;gap:10px;pointer-events:auto}.record-pill,.icon-button{background:rgba(252,255,244,.6);border:1px solid rgba(255,255,255,.55);box-shadow:0 3px 8px #244c3803}.record-pill{display:flex;align-items:center;gap:10px;border-radius:30px;padding:11px 17px;font-size:12px}.record-pill strong{font-size:16px;font-variant-numeric:tabular-nums;min-width:12px}.record-pill .record-label{opacity:.7}.icon-button{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;transition:background .18s,transform .18s}.icon-button:hover,.record-pill:hover{background:#fffbee}.icon-button svg{width:18px;height:18px}.record-pill svg{width:16px;height:16px}
+#score-hud{position:fixed;top:max(99px,calc(env(safe-area-inset-top) + 75px));left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;z-index:3}.eyebrow{font-size:10px;letter-spacing:3px;font-weight:700;text-transform:uppercase}.score-label{font-size:11px;letter-spacing:4px;opacity:.6}.score-number{font-size:76px;line-height:1.15;font-weight:650;letter-spacing:-5px;font-variant-numeric:tabular-nums}.score-number.bump{animation:bump .24s ease-out}#combo-tag{font-size:11px;background:#fcf8c4;border:1px solid #fffac5;padding:6px 12px;border-radius:20px;margin-top:8px;display:inline-flex;gap:5px;align-items:center}.mode-tag{font-size:10px;letter-spacing:1px;opacity:.6;margin-top:5px}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:90px 22px 38px;background:rgba(27,70,58,.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fade-in .2s ease-out}.overlay.home{pointer-events:none;background:none;backdrop-filter:none;-webkit-backdrop-filter:none;justify-content:flex-start;padding:110px max(40px,7.2vw) 65px}.home-panel{width:490px;pointer-events:auto;position:relative;padding-bottom:16px}.small-tag{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(51,91,72,.14);background:#e8f2d978;border-radius:24px;padding:8px 13px;font-size:11px;letter-spacing:1px}.small-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:#679565}.home-panel h1{font-size:clamp(40px,4.3vw,67px);line-height:1.3;letter-spacing:-2px;margin:23px 0 18px;font-weight:800}.home-panel h1 span{color:#3b7256;display:block}.home-copy{font-size:14px;line-height:1.95;color:#547b6a;margin:0 0 29px;letter-spacing:.4px}.start-actions{display:flex;gap:11px;align-items:stretch;max-width:382px}.primary-button{display:flex;align-items:center;justify-content:center;gap:12px;background:var(--green);color:#fafced;border-radius:16px;font-size:15px;font-weight:650;min-height:54px;padding:0 24px;transition:background .18s,box-shadow .18s;box-shadow:0 8px 22px #245c4520}.primary-button:hover{background:#194b37;box-shadow:0 10px 26px #245c4533}.primary-button svg{width:20px;height:20px}.primary-button .arrow{margin-left:auto}.start-actions .primary-button{flex:1;justify-content:flex-start;min-height:59px}.secondary-button{display:flex;align-items:center;justify-content:center;gap:9px;background:rgba(255,255,245,.72);border:1px solid rgba(64,102,75,.13);border-radius:16px;font-size:13px;font-weight:600;padding:13px 19px;min-height:49px;transition:background .18s}.secondary-button:hover{background:#fffff8}.secondary-button svg{width:17px;height:17px}.daily-button{flex-direction:column;gap:4px;min-width:102px;padding:9px 15px}.daily-button span{font-size:9px;font-weight:400;opacity:.62;letter-spacing:1px}.fruit-picker{margin-top:29px}.section-caption{display:flex;align-items:center;gap:10px;font-size:11px;color:#608373;letter-spacing:.4px}.section-caption::after{content:"";height:1px;width:90px;background:#6c98802b}.fruit-row{display:flex;gap:9px;margin-top:12px}.fruit-option{width:45px;height:45px;border-radius:50%;display:grid;place-items:center;border:1.5px solid transparent;background:rgba(250,255,242,.34);padding:0;position:relative;transition:background .2s,border-color .2s,transform .2s}.fruit-option:hover{background:rgba(255,255,249,.75);transform:translateY(-3px)}.fruit-option.selected{border-color:#4d8063;background:#f6f9dc;box-shadow:0 0 0 3px #ffffff3a}.fruit-option canvas{width:39px;height:43px;pointer-events:none}.fruit-option.selected::after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:#4d8063;bottom:-8px}.home-meta{font-size:10px;color:#749382;display:flex;gap:17px;margin-top:29px}.home-meta span{display:flex;gap:5px;align-items:center}.home-meta svg{width:12px;height:12px}.scene-label{position:fixed;right:19%;bottom:21%;z-index:2;pointer-events:none;transform:rotate(-7deg);font-size:12px;font-weight:500;color:#4f806f;letter-spacing:1px}.scene-label::before{content:"↗";display:block;font-size:25px;margin-bottom:4px;margin-left:17px;font-weight:300}
+.footer{position:fixed;left:max(32px,env(safe-area-inset-left));right:max(32px,env(safe-area-inset-right));bottom:max(23px,env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none;gap:12px}.weather{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:1px;opacity:.7}.status-dot{width:5px;height:5px;border-radius:50%;background:#4c866b;box-shadow:0 0 0 4px #54917312}.footer-right{display:flex;align-items:center;gap:13px;pointer-events:auto}.text-button{padding:5px 0;background:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:#466c5c}.text-button svg{width:15px;height:15px}.fps{font-size:10px;color:#4a7461;font-variant-numeric:tabular-nums;border-left:1px solid #517c6224;padding-left:13px;min-width:48px}.run-stats{font-size:11px;color:#446c5b;letter-spacing:.4px}.run-stats b{font-weight:700;margin-right:8px}
+#control-hud{position:fixed;left:50%;bottom:max(65px,calc(env(safe-area-inset-bottom) + 49px));transform:translateX(-50%);width:min(328px,calc(100vw - 68px));z-index:4;pointer-events:none;text-align:center}.hold-hint{font-size:12px;letter-spacing:1px;margin-bottom:13px;color:#315f4d;display:flex;justify-content:center;align-items:center;gap:8px}.hold-hint svg{width:18px;height:18px}.hold-hint kbd{font:inherit;font-size:9px;padding:2px 5px;border:1px solid #73998655;border-radius:4px;background:#f7ffe540}.charge-outer{position:relative;height:8px;background:#386b5223;border-radius:10px;box-shadow:inset 0 1px 2px #28694b09;overflow:visible}.charge-fill{height:100%;width:100%;transform-origin:left;transform:scaleX(0);border-radius:10px;background:#2b7453;will-change:transform}.charge-target{position:absolute;height:14px;top:-3px;background:#f9ea9f;border:1px solid #8f854744;box-shadow:0 0 0 2px #f4f4d642;border-radius:5px;opacity:.9}.charge-tick{position:absolute;left:0;top:-4px;height:16px;width:3px;background:#fffce8;border-radius:4px;box-shadow:0 1px 4px #234c3d4a;will-change:transform}.charge-labels{display:flex;justify-content:space-between;font-size:9px;letter-spacing:1px;margin-top:9px;opacity:.55}.charge-labels .center-label{opacity:1;letter-spacing:.7px}
+.panel{width:420px;max-width:100%;background:rgba(252,253,245,.97);border:1px solid #ffffffe0;border-radius:28px;box-shadow:var(--shadow);padding:32px;position:relative;max-height:calc(100dvh - 126px);overflow:auto;scrollbar-width:thin;scrollbar-color:#b5ccb6 transparent}.panel.wide{width:450px}.panel-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}.panel .eyebrow{font-size:9px;color:#839583;letter-spacing:2.5px}.panel h2{font-size:27px;margin:8px 0 0;letter-spacing:-.8px}.panel .close-button{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#eaf0e4}.close-button svg{width:15px;height:15px}.panel-subtitle{color:#7a8c7b;font-size:12px;line-height:1.8;margin:10px 0 22px}.panel-actions{display:grid;gap:10px;margin-top:24px}.panel-actions.two{grid-template-columns:1fr 1fr}.panel-actions.two .primary-button{padding:0 12px}.result-panel{text-align:center;width:410px;padding-top:26px}.wet-icon{width:82px;height:82px;display:block;margin:0 auto 5px}.wet-title{font-size:34px!important;letter-spacing:-1.5px!important;margin:3px 0 8px!important}.result-panel .eyebrow{margin-bottom:8px;color:#6b9583}.result-sub{font-size:12px;color:#859282;margin:9px 0 24px}.result-score{font-size:78px;line-height:1;letter-spacing:-5px;font-weight:700;font-variant-numeric:tabular-nums}.new-record{font-size:10px;color:#87752f;background:#f3ecc3;padding:6px 10px;border-radius:16px;display:inline-flex;align-items:center;gap:5px;margin-top:12px}.new-record svg{width:12px;height:12px}.result-grid{display:grid;grid-template-columns:repeat(3,1fr);margin:25px 0 0;background:#edf2e5;border-radius:16px;padding:16px 8px}.result-grid>div+div{border-left:1px solid #47674c1a}.result-grid strong{display:block;font-size:21px;line-height:1.2;font-variant-numeric:tabular-nums}.result-grid span{font-size:10px;color:#789078;display:block;margin-top:6px}.result-bottom{display:flex;justify-content:center;gap:27px;margin-top:18px}.result-bottom .text-button{font-size:11px}.pause-symbol{width:64px;height:64px;border-radius:22px;background:#e5edd4;display:grid;place-items:center;margin-bottom:21px}.pause-symbol svg{width:25px;height:25px}.pause-panel h2{font-size:30px}.pause-score{display:flex;justify-content:space-between;background:#edf2e6;border-radius:14px;padding:16px;font-size:12px;margin-top:22px;align-items:center}.pause-score strong{font-size:23px}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid #48724612}.setting-row:last-of-type{border-bottom:0}.setting-name{font-size:13px;font-weight:650}.setting-detail{font-size:10px;line-height:1.7;color:#839180;margin-top:5px;max-width:240px}.switch{position:relative;width:40px;height:24px;border-radius:16px;background:#d3dfcc;padding:0;transition:background .2s}.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fdfef3;border-radius:50%;box-shadow:0 1px 3px #32482b23;transition:transform .2s}.switch[aria-checked=true]{background:#4f7850}.switch[aria-checked=true]::after{transform:translateX(16px)}select{max-width:120px;padding:8px 25px 8px 11px;background:#eaf0e2;color:#466548;border:0;border-radius:9px;font-size:11px;cursor:pointer}.volume-input{width:99px;accent-color:#527950}.setting-foot{font-size:10px;line-height:1.8;color:#889784;margin-top:18px}.help-steps{display:grid;gap:20px;margin:26px 0}.help-step{display:flex;gap:14px;align-items:flex-start}.step-number{width:31px;height:31px;background:#e5edd8;border-radius:11px;display:grid;place-items:center;font-size:12px;flex-shrink:0;font-weight:700}.help-step h3{font-size:13px;margin:1px 0 6px}.help-step p{font-size:11px;color:#778b75;margin:0;line-height:1.8}.rule-box{border-radius:14px;background:#f1f1dc;padding:15px;font-size:11px;line-height:1.9;color:#788162}.key-row{font-size:10px;color:#7c8b79;margin-top:18px;display:flex;justify-content:space-between;gap:8px}.key-row kbd{font:inherit;background:#e8eddf;padding:3px 5px;border-radius:4px;margin-right:4px}.record-tabs{display:flex;background:#eaf0e1;border-radius:11px;padding:4px;margin-bottom:20px}.record-tab{flex:1;background:none;padding:9px;border-radius:8px;font-size:11px;color:#7b9073}.record-tab.active{background:#fffef5;color:#38553d;box-shadow:0 2px 5px #284d2910}.record-summary{display:flex;justify-content:space-around;text-align:center;padding:10px 0 24px}.record-summary b{display:block;font-size:30px;font-weight:650}.record-summary span{font-size:10px;color:#889780;display:block;margin-top:5px}.leaderboard-head,.leaderboard-row{display:grid;grid-template-columns:30px 1fr 47px;gap:10px;align-items:center}.leaderboard-head{color:#96a08d;font-size:9px;letter-spacing:.6px;padding:0 4px 10px}.leaderboard-row{padding:12px 4px;border-top:1px solid #36572810;font-size:12px}.rank{font-size:11px;color:#94a18a}.leaderboard-row:first-of-type .rank{color:#9d8540}.record-date{font-size:11px}.record-date span{font-size:9px;color:#95a28f;display:block;margin-top:3px}.record-value{text-align:right;font-weight:700;font-size:17px}.empty-record{text-align:center;padding:35px 5px;color:#8b9a84;font-size:12px;line-height:2}.record-notice{font-size:9px;color:#929d87;line-height:1.8;text-align:center;margin-top:20px}
+#toast{position:fixed;top:85px;left:50%;transform:translateX(-50%) translateY(-8px);padding:11px 18px;border-radius:25px;background:rgba(32,73,52,.92);color:#f6f7e6;font-size:12px;z-index:30;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:calc(100vw - 40px);text-align:center;line-height:1.7}#toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}#share-fallback{width:100%;height:85px;background:#f0f3e5;color:#526b4c;border:1px solid #dce5cf;border-radius:12px;padding:12px;resize:none;user-select:text;font:12px/1.7 inherit;margin-top:14px}#live-region{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.no-canvas{position:fixed;z-index:50;inset:0;background:#eef6e8;padding:60px 25px;text-align:center;color:#365a40}noscript{position:fixed;z-index:90;background:#fcf7e1;inset:0;display:grid;place-items:center;padding:30px;text-align:center}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}@keyframes bump{0%{transform:scale(1)}45%{transform:scale(1.14)}100%{transform:scale(1)}}
+@media(min-width:1500px){.home-panel{margin-left:2vw}.home-panel h1{font-size:70px}.home-copy{font-size:16px}}
+@media(max-width:1000px) and (min-width:701px){.overlay.home{padding-left:5vw}.home-panel{width:385px}.home-panel h1{font-size:48px}.home-copy{font-size:13px}.start-actions{max-width:320px}.fruit-row{gap:7px}.scene-label{right:13%;bottom:20%}}
+@media(max-width:700px){.app-header{left:max(20px,env(safe-area-inset-left));right:max(20px,env(safe-area-inset-right));top:max(19px,env(safe-area-inset-top));gap:10px}.brand{gap:8px}.brand-mark{width:36px;height:36px;border-radius:12px}.brand-mark svg{width:26px;height:26px}.brand-cn{font-size:16px;letter-spacing:.5px}.brand-en{font-size:7px;letter-spacing:2.1px;margin-top:3px}.header-actions{gap:7px}.icon-button{width:36px;height:36px}.icon-button svg{width:16px;height:16px}.record-pill{padding:8px 10px;gap:6px;min-height:36px}.record-pill .record-label{display:none}.record-pill strong{font-size:13px}.record-pill svg{width:14px;height:14px}.overlay.home{display:block;padding:0;overflow:hidden}.home-panel{position:absolute;left:25px;right:25px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 43px));width:auto;padding:0;pointer-events:none}.home-panel>*{pointer-events:auto}.small-tag{font-size:9px;padding:6px 10px;letter-spacing:.7px}.home-panel h1{font-size:34px;letter-spacing:-1px;line-height:1.28;margin:12px 0 10px}.home-panel h1 span{display:inline;margin-left:0}.home-panel h1 .title-first{display:none}.home-copy{font-size:11px;margin:0 0 16px;line-height:1.75;max-width:100%;color:#47735d}.home-copy br{display:none}.start-actions{max-width:100%;gap:10px}.start-actions .primary-button{min-height:52px;font-size:14px;border-radius:14px}.daily-button{min-width:102px;border-radius:14px;padding:8px 13px;font-size:11px}.daily-button span{font-size:8px}.fruit-picker{margin-top:19px;display:flex;align-items:center;gap:12px}.section-caption{font-size:9px;flex-shrink:0}.section-caption::after{display:none}.fruit-row{margin:0;gap:7px}.fruit-option{width:34px;height:34px}.fruit-option canvas{width:31px;height:34px}.fruit-option.selected::after{bottom:-6px;width:4px;height:4px}.home-meta{display:none}.scene-label{display:none}.footer{left:23px;right:23px;bottom:max(20px,env(safe-area-inset-bottom));gap:8px}.weather{font-size:8px;letter-spacing:.5px;gap:7px}.footer-right{gap:10px}.footer-right .text-button{font-size:10px}.fps{font-size:9px;padding-left:10px;min-width:44px}.panel{border-radius:25px;padding:26px;width:380px;max-height:calc(100dvh - 100px)}.overlay:not(.home){padding:72px 20px 26px}.panel h2{font-size:25px}.result-panel{padding:25px}.wet-icon{height:69px;width:69px}.wet-title{font-size:31px!important}.result-sub{margin-bottom:20px}.result-score{font-size:70px}.result-grid{margin-top:22px;padding:14px 6px}.result-grid strong{font-size:19px}.result-grid span{font-size:9px}.result-panel .panel-actions{margin-top:21px}.result-panel .primary-button{min-height:49px}#score-hud{top:max(88px,calc(env(safe-area-inset-top) + 64px))}.score-number{font-size:64px}.score-label{font-size:9px;letter-spacing:3px}.mode-tag{font-size:9px}.hold-hint{font-size:11px}#control-hud{bottom:max(69px,calc(env(safe-area-inset-bottom) + 53px));width:270px}.run-stats{font-size:9px}.run-stats b{margin-right:5px}.key-row{display:none}.setting-row{padding:13px 0}.setting-detail{font-size:9px}.panel-header{margin-bottom:17px}}
+@media(max-width:370px){.home-panel{left:21px;right:21px}.home-panel h1{font-size:30px}.fruit-picker{gap:10px}.fruit-row{gap:5px}.fruit-option{width:31px;height:31px}.brand-cn{font-size:14px}.app-header{left:17px;right:17px}.header-actions{gap:5px}.brand-en{letter-spacing:1.6px}.home-copy{font-size:10px}.footer{left:20px;right:20px}.panel{padding:23px}}
+@media(max-height:700px) and (max-width:700px) and (orientation:portrait){.home-panel{bottom:56px}.home-panel h1{margin:9px 0;font-size:30px}.home-copy{margin-bottom:12px;font-size:10px}.fruit-picker{margin-top:14px}.small-tag{padding:4px 9px;font-size:8px}.start-actions .primary-button{min-height:47px}.daily-button{padding:5px 12px}.footer{bottom:17px}.panel{max-height:calc(100dvh - 83px)}.result-panel .wet-icon{width:49px;height:49px}.result-panel .result-sub{margin-bottom:14px}.result-panel .result-score{font-size:60px}.result-grid{margin-top:16px}.result-panel .panel-actions{margin-top:17px}.result-bottom{margin-top:12px}.panel-header{margin-bottom:17px}.help-steps{gap:14px;margin:20px 0}#score-hud{top:78px}.score-number{font-size:55px}}
+@media(max-height:520px) and (orientation:landscape){.app-header{top:14px;left:24px;right:24px}.brand-mark{width:33px;height:33px}.brand-cn{font-size:14px}.brand-en{font-size:7px}.record-pill{min-height:33px;padding:7px 12px}.icon-button{width:33px;height:33px}.overlay.home{padding:63px 6vw 40px;display:flex;overflow:visible}.home-panel{position:relative;left:auto;right:auto;bottom:auto;width:340px}.small-tag{font-size:8px;padding:5px 9px}.home-panel h1{font-size:34px;margin:10px 0}.home-panel h1 .title-first{display:inline}.home-panel h1 span{display:block}.home-copy{font-size:10px;margin-bottom:13px}.start-actions{max-width:294px}.start-actions .primary-button{min-height:42px;font-size:12px;border-radius:12px}.daily-button{font-size:10px;min-height:40px;padding:5px 10px;min-width:90px;border-radius:12px}.fruit-picker{margin-top:14px;display:flex;align-items:center;gap:12px}.section-caption{font-size:9px}.section-caption::after{display:none}.fruit-row{gap:6px;margin-top:0}.fruit-option{width:29px;height:29px}.fruit-option canvas{width:27px;height:30px}.home-meta,.scene-label{display:none}.footer{bottom:13px;font-size:9px}.weather{font-size:8px}.panel{max-height:calc(100dvh - 55px);padding:22px;width:410px}.overlay:not(.home){padding:40px 20px 15px}.result-panel{width:450px}.result-panel .wet-icon{width:45px;height:45px;margin:0 auto}.wet-title{font-size:25px!important}.result-sub{margin:4px 0 10px}.result-score{font-size:48px}.result-grid{margin-top:12px;padding:10px 6px}.result-grid strong{font-size:17px}.result-grid span{margin-top:3px}.result-panel .panel-actions{margin-top:15px}.result-panel .primary-button,.result-panel .secondary-button{min-height:42px}.result-bottom{margin-top:10px}.new-record{margin-top:6px;padding:4px 8px}#score-hud{top:66px}.score-number{font-size:45px}.score-label{font-size:8px}.mode-tag{display:none}#control-hud{bottom:40px;width:250px}.hold-hint{font-size:10px;margin-bottom:8px}.charge-labels{margin-top:6px;font-size:8px}.panel .pause-symbol{display:none}.pause-panel .panel-header{margin-bottom:10px}.pause-panel .panel-subtitle{margin-bottom:10px}.pause-score{margin-top:10px;padding:10px 15px}.pause-panel .panel-actions{margin-top:15px}.pause-panel .primary-button,.pause-panel .secondary-button{min-height:40px}}
+@media(max-width:350px){.fruit-picker .section-caption{max-width:40px;line-height:1.5;flex-shrink:1;font-size:8px}.fruit-picker{gap:9px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<canvas id="sea" aria-label="果子跳跳游戏画面。按住鼠标、触屏或空格键蓄力，松开跳跃。"></canvas>
+<noscript>果子跳跳需要 JavaScript 才能运行。请在浏览器中启用 JavaScript，然后重新打开本文件。</noscript>
+<header class="app-header">
+  <button class="brand" id="brand-button" aria-label="果子跳跳首页">
+    <span class="brand-mark"><svg width="31" height="31" viewBox="0 0 40 40" fill="none"><path d="M21 12C26 5 33 8 31 12C28 16 24 14 21 12Z" fill="#BED78D"/><path d="M20 14C18 11 17 9 19 7" stroke="#EFEBD0" stroke-width="2.3" stroke-linecap="round"/><path d="M7 24C7 16 13 13 20 13C28 13 33 17 33 25C33 33 27 36 20 36C12 36 7 31 7 24Z" fill="#EDECA7"/><path d="M12 21C13 18 15 17 17 17" stroke="#FFFEE0" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="25" r="1.25" fill="#34583C"/><circle cx="25" cy="25" r="1.25" fill="#34583C"/><path d="M19 29Q21 31 23 29" stroke="#34583C" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+    <span class="brand-cn">果子跳跳<span class="brand-en">FRUIT HOP</span></span>
+  </button>
+  <div class="header-actions">
+    <button class="record-pill" id="records-button" title="本地纪录" aria-label="查看本地纪录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H16V9C16 12 14 14 12 14C10 14 8 12 8 9V3Z"/><path d="M8 5H4V7C4 10 6 11 8 11M16 5H20V7C20 10 18 11 16 11M12 14V19M8 21H16M9 19H15"/></svg><span class="record-label">最高纪录</span><strong id="header-best">0</strong></button>
+    <button class="icon-button" id="sound-button" aria-label="关闭音效" title="音效（M）"></button>
+    <button class="icon-button" id="settings-button" aria-label="设置" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7H20M4 17H20"/><rect x="8" y="4" width="4" height="6" rx="1.5" fill="#e4efe0"/><rect x="14" y="14" width="4" height="6" rx="1.5" fill="#e4efe0"/></svg></button>
+    <button class="icon-button" id="pause-button" aria-label="暂停游戏" title="暂停（Esc / P）" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M8 5V19M16 5V19"/></svg></button>
+  </div>
+</header>
+<section id="score-hud" hidden aria-label="游戏得分">
+  <div class="score-label">本次得分</div><div class="score-number" id="score">00</div><div class="mode-tag" id="mode-tag">经典航线 · 自由跳跃</div><div id="combo-tag" hidden>靶心连击 <b id="combo-number">×2</b></div>
+</section>
+<div id="hero-note" class="scene-label">岸上水果，请勿泡水。</div>
+<section class="overlay home" id="home-screen">
+  <div class="home-panel">
+    <div class="small-tag">一颗果子的小小冒险</div>
+    <h1><span class="title-first" style="color:inherit">一颗果子，</span><span>跳过整片海。</span></h1>
+    <p class="home-copy">按住蓄力，松手起跳。<br>落在中心，让每一跳都有好事发生。</p>
+    <div class="start-actions"><button class="primary-button" id="start-button">开始跳跃<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12H20M14 6L20 12L14 18"/></svg></button><button class="secondary-button daily-button" id="daily-button">每日挑战<span id="daily-date">每日同一片海</span></button></div>
+    <div class="fruit-picker"><div class="section-caption">今天，哪颗出发？</div><div class="fruit-row" id="fruit-row" role="group" aria-label="选择水果角色"></div></div>
+    <div class="home-meta"><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 8L6 11L13 4"/></svg>即开即玩</span><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="2" width="10" height="12" rx="2"/><path d="M6 11H10"/></svg>触屏友好</span><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 3H11L13 5V13H3V3Z"/><path d="M5 3V7H10V3M5 13V9H11V13"/></svg>纪录自动保存</span></div>
+  </div>
+</section>
+<section class="overlay" id="pause-screen" hidden>
+ <div class="panel pause-panel" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+  <div class="pause-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 5V19M16 5V19"/></svg></div><div class="eyebrow">TAKE A LITTLE BREAK</div><h2 id="pause-title">让果子歇一会儿。</h2><p class="panel-subtitle">海风还在，下一块小岛也在。</p><div class="pause-score"><span>当前得分</span><strong id="pause-score">0</strong></div>
+  <div class="panel-actions"><button class="primary-button" id="resume-button">继续跳跃<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 5L19 12L9 19V5Z"/></svg></button><div class="panel-actions two" style="margin-top:0"><button class="secondary-button" id="restart-pause">重新开始</button><button class="secondary-button" id="home-pause">返回首页</button></div></div><div class="result-bottom"><button class="text-button" id="pause-settings">偏好设置</button><button class="text-button" id="pause-help">查看玩法</button></div>
+ </div>
+</section>
+<section class="overlay" id="over-screen" hidden>
+ <div class="panel result-panel" role="dialog" aria-modal="true" aria-labelledby="over-title">
+  <canvas id="wet-fruit" class="wet-icon" width="164" height="164" aria-hidden="true"></canvas><div class="eyebrow">A LITTLE TOO JUICY</div><h2 class="wet-title" id="over-title">果子潮了</h2><p class="result-sub" id="result-comment">海水不是果汁，下次记得跳远一点。</p><div class="result-score" id="result-score">0</div><div class="new-record" id="new-record" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 2H11V6A3 3 0 0 1 5 6V2ZM5 3H2V5Q2 7 5 7M11 3H14V5Q14 7 11 7M8 9V13M5 14H11"/></svg>刷新本地纪录</div>
+  <div class="result-grid"><div><strong id="result-best">0</strong><span id="result-best-label">历史最佳</span></div><div><strong id="result-jumps">0</strong><span>成功跳跃</span></div><div><strong id="result-combo">0</strong><span>最高靶心连击</span></div></div>
+  <div class="panel-actions"><button class="primary-button" id="retry-button">捞起来，再跳一次<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8A8 8 0 1 0 20 16M20 3V8H15"/></svg></button></div><div class="result-bottom"><button class="text-button" id="home-over">返回首页</button><button class="text-button" id="share-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V3M7 8L12 3L17 8M5 13V20H19V13"/></svg>分享成绩</button><button class="text-button" id="over-records">本地榜单</button></div><textarea id="share-fallback" readonly hidden aria-label="分享文字，长按或全选复制"></textarea>
+ </div>
+</section>
+<section class="overlay" id="settings-screen" hidden>
+ <div class="panel wide" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="panel-header"><div><div class="eyebrow">MAKE IT YOURS</div><h2 id="settings-title">按你的节奏。</h2></div><button class="close-button" data-close aria-label="关闭设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6L18 18M18 6L6 18"/></svg></button></div>
+  <div class="setting-row"><div><div class="setting-name">游戏音效</div><div class="setting-detail">轻快的起跳声，和真实……合成的水花。</div></div><button class="switch" id="setting-sound" role="switch" aria-checked="true" aria-label="游戏音效"></button></div>
+  <div class="setting-row"><div><div class="setting-name">音量</div><div class="setting-detail">不会播放背景音乐。</div></div><input class="volume-input" id="setting-volume" type="range" min="0" max="100" step="5" value="55" aria-label="音效音量"></div>
+  <div class="setting-row"><div><div class="setting-name">新手瞄准</div><div class="setting-detail">显示预计落点与靶心力度区间，可随时关闭。</div></div><button class="switch" id="setting-assist" role="switch" aria-checked="true" aria-label="新手瞄准辅助"></button></div>
+  <div class="setting-row"><div><div class="setting-name">轻触反馈</div><div class="setting-detail">在支持振动的设备上提供落地反馈。</div></div><button class="switch" id="setting-haptic" role="switch" aria-checked="true" aria-label="振动反馈"></button></div>
+  <div class="setting-row"><div><div class="setting-name">画面质量</div><div class="setting-detail" id="quality-detail">自适应分辨率，优先保证操作流畅。</div></div><select id="setting-quality" aria-label="画面质量"><option value="auto">自适应</option><option value="low">流畅</option><option value="high">精细</option></select></div>
+  <div class="setting-row"><div><div class="setting-name">帧率显示</div><div class="setting-detail">实时测量，不人为锁定 60 帧。</div></div><button class="switch" id="setting-fps" role="switch" aria-checked="true" aria-label="显示帧率"></button></div>
+  <button class="secondary-button" id="fullscreen-button" style="width:100%;margin-top:20px">进入全屏</button><div class="setting-foot">偏好会保存在当前浏览器。切换标签页或打开菜单会自动暂停，蓄力则安全取消。</div>
+ </div>
+</section>
+<section class="overlay" id="help-screen" hidden>
+ <div class="panel wide" role="dialog" aria-modal="true" aria-labelledby="help-title">
+  <div class="panel-header"><div><div class="eyebrow">SMALL HOPS, BIG JOY</div><h2 id="help-title">三步，学会过海。</h2></div><button class="close-button" data-close aria-label="关闭玩法"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6L18 18M18 6L6 18"/></svg></button></div>
+  <div class="help-steps"><div class="help-step"><div class="step-number">01</div><div><h3>按住，给果子一点勇气</h3><p>在游戏画面按住鼠标、手指或空格键。按得越久，跳得越远；蓄满后力度不再增加。</p></div></div><div class="help-step"><div class="step-number">02</div><div><h3>松开，奔向下一块小岛</h3><p>方向会自动对准下一块平台，只需控制距离。黄色力度区间与虚线落点能帮你瞄准。</p></div></div><div class="help-step"><div class="step-number">03</div><div><h3>踩中靶心，好事加倍</h3><p>普通落地 +1；正中靶心 +2，连续命中依次 +4、+6、+8，最高每跳 +10。金色果汁岛额外 +3。</p></div></div></div>
+  <div class="rule-box">落在原地可以继续蓄力，但不会加分。落水就会「果子潮了」。每日挑战使用本地日期的固定航线；经典模式每次都是新旅程。所有水果免费使用，手感一致。</div><div class="key-row"><span><kbd>Space</kbd>蓄力</span><span><kbd>Esc / P</kbd>暂停</span><span><kbd>R</kbd>重开</span><span><kbd>M</kbd>音效</span></div><button class="primary-button" data-close style="width:100%;margin-top:24px">懂了，准备起跳</button>
+ </div>
+</section>
+<section class="overlay" id="records-screen" hidden>
+ <div class="panel" role="dialog" aria-modal="true" aria-labelledby="records-title">
+  <div class="panel-header"><div><div class="eyebrow">YOUR LITTLE MILESTONES</div><h2 id="records-title">每一步，都算数。</h2></div><button class="close-button" data-close aria-label="关闭纪录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6L18 18M18 6L6 18"/></svg></button></div>
+  <div class="record-tabs" role="tablist" aria-label="纪录类型"><button class="record-tab active" id="classic-tab" role="tab" aria-selected="true">经典航线</button><button class="record-tab" id="daily-tab" role="tab" aria-selected="false">今日挑战</button></div><div class="record-summary"><div><b id="records-best">0</b><span>最佳得分</span></div><div><b id="records-runs">0</b><span>完成局数</span></div></div><div class="leaderboard-head"><span>名次</span><span>出发时间 / 水果</span><span style="text-align:right">得分</span></div><div id="leaderboard"></div><div class="record-notice">仅记录此浏览器的成绩，不是在线排名。<br>清除网站数据或更换浏览器后，纪录可能丢失。</div>
+ </div>
+</section>
+<section id="control-hud" hidden>
+ <div class="hold-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 13V5A2 2 0 0 1 13 5V11L15 10L19 12V17C19 20 17 22 14 22H12C10 22 8 21 7 19L4 14A2 2 0 0 1 7 12L9 14"/></svg><span id="hold-text">按住屏幕蓄力 · 松手跳跃</span></div><div class="charge-outer" id="charge-outer"><div class="charge-target" id="charge-target"></div><div class="charge-fill" id="charge-fill"></div><div class="charge-tick" id="charge-tick" hidden></div></div><div class="charge-labels"><span>轻轻一跳</span><span class="center-label" id="charge-center-label">黄色区域 = 靶心力度</span><span>跳远一点</span></div>
+</section>
+<footer class="footer"><div class="weather" id="home-weather"><span class="status-dot"></span>海面平静，适合起跳</div><div class="run-stats" id="run-stats" hidden>成功 <b id="stat-jumps">0</b> 靶心 <b id="stat-perfect">0</b></div><div class="footer-right"><button class="text-button" id="help-button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M8 7.5C8 5 13 5 12 8C11.5 9 10 9 10 11M10 14V14.1"/></svg>怎么玩</button><span class="fps" id="fps">— FPS</span></div></footer>
+<div id="toast" role="status"></div><div id="live-region" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+(() => {
+/* Fruit Hop — entirely self-contained, no network requests, external assets or libraries.
+   Orthographic 2.5D Canvas renderer; analytic, elapsed-time-based jump physics.
+   One animation loop, bounded particles, prebuilt geometry, cached fruit sprites.
+   Controls: Pointer / Space = hold/release; Esc/P = pause; R = restart; M = sound. */
+const $ = id => document.getElementById(id);
+const canvas = $('sea'), ctx = canvas.getContext('2d', {alpha:false, desynchronized:false});
+if (!ctx) { const note=document.createElement('div'); note.className='no-canvas'; note.textContent='浏览器暂不支持 Canvas 2D。请使用支持 HTML5 的浏览器打开此文件。';document.body.append(note);return; }
+const TAU=Math.PI*2, IX=.86, IZ=.44, TOP=46, MAX_CHARGE=1.22, MIN_DIST=12, MAX_DIST=340;
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)), lerp=(a,b,t)=>a+(b-a)*t;
+const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STORAGE='fruit_hop_v1';
+const FRUITS=[{id:'orange',name:'橘子',color:'#f7a34d'},{id:'lime',name:'青柠',color:'#98bd59'},{id:'peach',name:'蜜桃',color:'#efa0a0'},{id:'lemon',name:'柠檬',color:'#e1c04c'},{id:'blueberry',name:'蓝莓',color:'#8b94d0'},{id:'melon',name:'西瓜',color:'#6eb082'}];
+const DEFAULTS={sound:true,volume:55,assist:true,haptic:true,quality:'auto',fps:true,fruit:'orange'};
+let saved={settings:{...DEFAULTS},best:0,daily:{},runs:0,records:[]},canStore=true;
+try{const raw=localStorage.getItem(STORAGE);if(raw){const o=JSON.parse(raw);if(o&&typeof o==='object'){saved.settings={...DEFAULTS,...(o.settings||{})};saved.best=Number.isFinite(o.best)?Math.max(0,o.best):0;saved.runs=Number.isFinite(o.runs)?Math.max(0,o.runs):0;saved.daily=o.daily&&typeof o.daily==='object'&&!Array.isArray(o.daily)?o.daily:{};saved.records=Array.isArray(o.records)?o.records.filter(r=>r&&Number.isFinite(r.score)&&typeof r.date==='string').slice(0,80):[];}}}catch(_){canStore=false;}
+const settings=saved.settings;
+if(!FRUITS.some(f=>f.id===settings.fruit))settings.fruit='orange';
+if(!['auto','low','high'].includes(settings.quality))settings.quality='auto';
+settings.volume=clamp(Number(settings.volume)||0,0,100);
+for(const key of ['sound','assist','haptic','fps'])settings[key]=!!settings[key];
+function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(saved));}catch(_){canStore=false;}}
+function dateKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function dailyInfo(key=dateKey()){return saved.daily[key]||{best:0,runs:0};}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function seeded(seed){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function randomSeed(){try{return crypto.getRandomValues(new Uint32Array(1))[0];}catch(_){return(Date.now()^Math.random()*0xffffffff)>>>0;}}
+const screens={home:$('home-screen'),pause:$('pause-screen'),over:$('over-screen'),settings:$('settings-screen'),help:$('help-screen'),records:$('records-screen')};
+const scoreEl=$('score'),fillEl=$('charge-fill'),tickEl=$('charge-tick'),targetEl=$('charge-target'),holdEl=$('hold-text');
+let screen='home',screenReturn='home',mode='classic',gameState='ready',active=false;
+let W=0,H=0,S=1,DPR=1,bgGradient=null,autoRatio=2,artVersion=0,renderDirty=true;
+let camX=0,camZ=0,anchorX=0,anchorY=0,worldTime=0,lastFrame=0,elapsedForFPS=0,framesForFPS=0,fps=60,frameAverage=16.67,slowSeconds=0,qualityCooldown=0;
+let rng=seeded(42),platforms=[],current=0,score=0,combo=0,maxCombo=0,jumps=0,perfectCount=0,runDate=dateKey(),runBestBefore=0,recorded=false;
+let player={x:0,z:0,h:TOP,rot:0},charge=0,chargeStartedAt=0,jump=null,fallTime=0,overDelay=0,landBounce=0,trailTimer=0;
+let pointerID=null,keyHeld=false,toastTimer=0,recordTab='classic',shake=0,shakeX=0,shakeY=0,homeBias=1,lastHoldText='';
+const cameraTarget={x:0,z:0};
+const audio={ctx:null,master:null,chargeOsc:null,chargeGain:null,noise:null};
+let splashHistory=0;
+const particles=Array.from({length:96},()=>({life:0,max:1,x:0,z:0,h:0,vx:0,vz:0,vh:0,size:2,color:'#ffffff',type:0}));
+const ripples=Array.from({length:14},()=>({life:0,max:1,x:0,z:0,r:1}));
+const labels=Array.from({length:6},()=>({life:0,max:1,x:0,z:0,h:0,text:'',sub:'',color:'#315c40'}));
+const waterMarks=Array.from({length:46},(_,i)=>{const r=seeded(812+i*1907);return{x:r(),y:r(),len:8+r()*23,phase:r()*TAU,kind:i%8};});
+const sprites={};
+const ICON_SOUND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5L5 9H2V15H5L10 19V5Z"/><path d="M14 8C17 10 17 14 14 16M17 5C22 9 22 15 17 19"/></svg>';
+const ICON_MUTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5L5 9H2V15H5L10 19V5Z"/><path d="M16 9L22 15M22 9L16 15"/></svg>';
+function initAudio(){
+ if(!settings.sound)return;
+ try{if(!audio.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;audio.ctx=new AC();audio.master=audio.ctx.createGain();audio.master.gain.value=settings.volume/100*.32;audio.master.connect(audio.ctx.destination);const length=audio.ctx.sampleRate*.5;audio.noise=audio.ctx.createBuffer(1,length,audio.ctx.sampleRate);const d=audio.noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);}
+ if(audio.ctx.state==='suspended')audio.ctx.resume().catch(()=>{});
+ }catch(_){}
+}
+function note(freq,duration=.12,delay=0,type='sine',volume=.6,endFreq=0){if(!settings.sound||!audio.ctx||audio.ctx.state!=='running')return;try{const a=audio.ctx,t=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(endFreq)o.frequency.exponentialRampToValueAtTime(Math.max(25,endFreq),t+duration);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,volume),t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audio.master);o.start(t);o.stop(t+duration+.025);o.onended=()=>{o.disconnect();g.disconnect();};}catch(_){} }
+function startHum(){stopHum();if(!settings.sound||!audio.ctx||audio.ctx.state!=='running')return;try{const o=audio.ctx.createOscillator(),g=audio.ctx.createGain();o.type='sine';o.frequency.value=145;g.gain.setValueAtTime(0,audio.ctx.currentTime);g.gain.linearRampToValueAtTime(.12,audio.ctx.currentTime+.08);o.connect(g);g.connect(audio.master);o.start();audio.chargeOsc=o;audio.chargeGain=g;}catch(_){} }
+function stopHum(){if(audio.chargeOsc){const o=audio.chargeOsc,g=audio.chargeGain;try{g.gain.cancelScheduledValues(audio.ctx.currentTime);g.gain.setTargetAtTime(.0001,audio.ctx.currentTime,.025);o.stop(audio.ctx.currentTime+.09);o.onended=()=>{o.disconnect();g.disconnect();};}catch(_){}audio.chargeOsc=null;audio.chargeGain=null;}}
+function sound(type,level=1){if(!settings.sound)return;initAudio();if(type==='jump'){note(290,.18,0,'sine',.38,680);note(580,.1,.06,'sine',.1,900);}else if(type==='land'){note(260,.09,0,'sine',.33);note(390,.1,.04,'sine',.2);}else if(type==='perfect'){const base=523.25*Math.pow(2,Math.min(level-1,5)/12);note(base,.14,0,'sine',.42);note(base*1.25,.14,.07,'sine',.34);note(base*1.5,.21,.13,'sine',.26);}else if(type==='bonus'){[659,784,1047].forEach((n,i)=>note(n,.16,i*.08,'sine',.25));}else if(type==='click')note(540,.065,0,'sine',.14);else if(type==='splash'){
+ note(180,.35,0,'sine',.5,45);try{if(audio.ctx&&audio.noise&&audio.ctx.state==='running'){const a=audio.ctx,t=a.currentTime,s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=audio.noise;f.type='lowpass';f.frequency.setValueAtTime(1900,t);f.frequency.exponentialRampToValueAtTime(280,t+.4);g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.45);s.connect(f);f.connect(g);g.connect(audio.master);s.start(t);s.onended=()=>{s.disconnect();f.disconnect();g.disconnect();};}}catch(_){}
+ }}
+function vibrate(pattern){if(settings.haptic&&navigator.vibrate){try{navigator.vibrate(pattern);}catch(_){}}}
+function setText(el,value){if(el.textContent!==String(value))el.textContent=String(value);}
+function toast(text){setText($('toast'),text);$('toast').classList.add('visible');toastTimer=2.8;}
+function live(text){setText($('live-region'),text);}
+function rounded(g,x,y,w,h,r){r=Math.min(r,w/2,h/2);g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+function ellipse(g,x,y,rx,ry,color){g.fillStyle=color;g.beginPath();g.ellipse(x,y,rx,ry,0,0,TAU);g.fill();}
+function buildFruit(id){
+ const c=document.createElement('canvas');c.width=192;c.height=208;const g=c.getContext('2d');g.scale(2,2);g.translate(48,61);
+ let grad;
+ if(id==='lemon'){
+  grad=g.createRadialGradient(-12,-14,2,4,7,40);grad.addColorStop(0,'#fff3a2');grad.addColorStop(.48,'#f4d158');grad.addColorStop(1,'#dca83d');g.fillStyle=grad;g.beginPath();g.moveTo(0,-27);g.bezierCurveTo(14,-29,23,-19,27,-5);g.bezierCurveTo(34,0,29,6,25,8);g.bezierCurveTo(21,27,6,31,-6,26);g.bezierCurveTo(-23,22,-27,10,-27,-2);g.bezierCurveTo(-33,-8,-28,-13,-24,-14);g.bezierCurveTo(-20,-24,-8,-28,0,-27);g.fill();
+ }else if(id==='peach'){
+  grad=g.createRadialGradient(-12,-13,2,6,10,44);grad.addColorStop(0,'#ffdfba');grad.addColorStop(.5,'#f9b6a7');grad.addColorStop(1,'#dc7c91');g.fillStyle=grad;g.beginPath();g.moveTo(0,-22);g.bezierCurveTo(21,-34,34,-15,29,5);g.bezierCurveTo(24,23,9,24,0,30);g.bezierCurveTo(-8,24,-26,21,-30,4);g.bezierCurveTo(-36,-14,-19,-34,0,-22);g.fill();g.strokeStyle='#d888913c';g.lineWidth=1.5;g.beginPath();g.moveTo(2,-21);g.bezierCurveTo(-3,-8,5,7,0,26);g.stroke();
+ }else{
+  const colors=id==='orange'?['#ffe0a0','#ffb558','#e98935']:id==='lime'?['#e5ef9e','#abcc65','#75a64b']:id==='blueberry'?['#c6cbe9','#8d9ed0','#6375aa']:['#c5df9a','#85bd7b','#509970'];
+  grad=g.createRadialGradient(-12,-16,1,6,7,43);grad.addColorStop(0,colors[0]);grad.addColorStop(.5,colors[1]);grad.addColorStop(1,colors[2]);ellipse(g,0,0,id==='melon'?29:30,id==='blueberry'?28:29,grad);
+  if(id==='melon'){g.save();g.beginPath();g.ellipse(0,0,29,29,0,0,TAU);g.clip();g.strokeStyle='#468f6066';g.lineWidth=4;for(let i=-2;i<=2;i++){g.beginPath();g.moveTo(i*7,-31);g.bezierCurveTo(i*12,-10,i*12,10,i*7,31);g.stroke();}g.restore();}
+  if(id==='orange'||id==='lime'||id==='lemon'){g.fillStyle=id==='orange'?'#d98e3f38':'#66963828';for(let i=0;i<22;i++){const a=i*2.4,r=12+Math.sin(i*3.7)*12;ellipse(g,Math.cos(a)*r,Math.sin(a)*r, .6,.75,g.fillStyle);}}
+ }
+ // Soft, baked highlight: no per-frame shadow blur or image decoding.
+ g.save();g.rotate(-.48);ellipse(g,-8,-16,9,3,'#fffbe63b');g.restore();
+ if(id==='blueberry'){g.fillStyle='#697db0';g.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?4:9;const x=Math.cos(a)*r,y=-25+Math.sin(a)*r*.58;i?g.lineTo(x,y):g.moveTo(x,y);}g.closePath();g.fill();ellipse(g,0,-25,3,2,'#576a9c');}
+ else{g.strokeStyle='#6e7250';g.lineWidth=2.5;g.lineCap='round';g.beginPath();g.moveTo(0,-25);g.quadraticCurveTo(-3,-32,0,-37);g.stroke();g.fillStyle=id==='peach'?'#5c9970':'#558f56';g.beginPath();g.moveTo(0,-31);g.bezierCurveTo(4,-43,20,-40,23,-34);g.bezierCurveTo(17,-26,8,-26,0,-31);g.fill();g.strokeStyle='#b4c980';g.lineWidth=.8;g.beginPath();g.moveTo(2,-31);g.quadraticCurveTo(10,-34,19,-34);g.stroke();}
+ return c;
+}
+function drawFace(g,mood='normal',blink=false){
+ g.strokeStyle='#4d5138';g.fillStyle='#414b34';g.lineCap='round';g.lineWidth=1.7;
+ if(mood==='wet'){g.beginPath();g.moveTo(-13,1);g.lineTo(-8,4);g.moveTo(8,4);g.lineTo(13,1);g.stroke();g.beginPath();g.arc(0,15,4,Math.PI+.25,TAU-.25);g.stroke();ellipse(g,15,12,2,3,'#78b9bd');}
+ else if(mood==='charge'){ellipse(g,-10,5,1.6,2.2,'#414b34');ellipse(g,10,5,1.6,2.2,'#414b34');g.beginPath();g.moveTo(-14,0);g.lineTo(-8,2);g.moveTo(8,2);g.lineTo(14,0);g.stroke();ellipse(g,0,12,2,2.4,'#6e6340');}
+ else if(mood==='jump'){ellipse(g,-10,3,1.7,2.5,'#414b34');ellipse(g,10,3,1.7,2.5,'#414b34');ellipse(g,0,12,3.5,4,'#726140');ellipse(g,0,14,2.2,1.4,'#eb9e85');}
+ else{if(blink){g.beginPath();g.moveTo(-12,4);g.lineTo(-8,4);g.moveTo(8,4);g.lineTo(12,4);g.stroke();}else{ellipse(g,-10,3,1.7,2.5,'#414b34');ellipse(g,10,3,1.7,2.5,'#414b34');ellipse(g,-9.6,2.2,.55,.7,'#fffbe7');ellipse(g,10.4,2.2,.55,.7,'#fffbe7');}g.beginPath();g.arc(0,9,4,.16,Math.PI-.16);g.stroke();}
+ ellipse(g,-16,10,4,2,'#ee987044');ellipse(g,16,10,4,2,'#ee987044');
+}
+for(const f of FRUITS)sprites[f.id]=buildFruit(f.id);
+function drawFruitIcon(canvas,id,wet=false){const g=canvas.getContext('2d');g.clearRect(0,0,canvas.width,canvas.height);g.save();g.translate(canvas.width/2,canvas.height*(wet?.58:.6));const scale=canvas.width/(wet?91:86);g.scale(scale,scale);if(wet)ellipse(g,0,21,37,8,'#bfddd7');g.drawImage(sprites[id],-48,-61,96,104);drawFace(g,wet?'wet':'normal');if(wet){g.fillStyle='#bfddd7';g.globalAlpha=.7;g.beginPath();g.ellipse(0,24,33,6,0,0,Math.PI);g.fill();g.globalAlpha=1;g.strokeStyle='#8bbfbd';g.lineWidth=1;g.beginPath();g.ellipse(0,26,37,8,0,.1,Math.PI-.1);g.stroke();ellipse(g,-32,5,2,3,'#a2ccca');ellipse(g,32,-1,1.5,2.5,'#a2ccca');}g.restore();}
+function buildPicker(){const row=$('fruit-row');for(const f of FRUITS){const b=document.createElement('button');b.className='fruit-option';b.title=f.name;b.setAttribute('aria-label',`选择${f.name}`);b.dataset.fruit=f.id;const c=document.createElement('canvas');c.width=90;c.height=98;b.append(c);drawFruitIcon(c,f.id);b.addEventListener('click',()=>{settings.fruit=f.id;persist();updateSettings();sound('click');});row.append(b);}}
+function updateSettings(){
+ $('sound-button').innerHTML=settings.sound?ICON_SOUND:ICON_MUTE;$('sound-button').setAttribute('aria-label',settings.sound?'关闭音效':'开启音效');
+ for(const id of ['sound','assist','haptic','fps'])$('setting-'+id).setAttribute('aria-checked',String(settings[id]));
+ $('setting-volume').value=settings.volume;$('setting-quality').value=settings.quality;$('fps').hidden=!settings.fps;
+ document.querySelectorAll('.fruit-option').forEach(b=>{const selected=b.dataset.fruit===settings.fruit;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
+ setText($('quality-detail'),settings.quality==='auto'?'自适应分辨率，优先保证操作流畅。':settings.quality==='low'?'减少水面细节与粒子，降低渲染分辨率。':'更清晰的边缘与完整水花，功耗可能更高。');
+ if(audio.master&&audio.ctx)audio.master.gain.setTargetAtTime(settings.sound?settings.volume/100*.32:0,audio.ctx.currentTime,.03);
+ if(!settings.sound)stopHum();
+ setText($('daily-date'),dateKey().slice(5).replace('-',' / ')+' · 固定航线');
+ setText($('header-best'),active&&mode==='daily'?Math.max(score,dailyInfo(runDate).best):Math.max(active?score:0,saved.best));updateChargeTarget();
+}
+function effectiveRatio(){const ratio=window.devicePixelRatio||1;return settings.quality==='low'?Math.min(ratio,1.2):settings.quality==='high'?Math.min(ratio,2.5):Math.min(ratio,autoRatio);}
+function resize(){
+ artVersion++;renderDirty=true;
+ W=window.innerWidth;H=window.innerHeight;DPR=Math.min(effectiveRatio(),Math.sqrt((settings.quality==='high'?5400000:3600000)/(W*H)));DPR=Math.max(.8,DPR);
+ canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);
+ S=H<520&&W>H?clamp(H/570,.58,.84):W<=700?clamp(W/500,.62,1):clamp(Math.min(W/1000,H/790),.76,1.35);
+ bgGradient=ctx.createLinearGradient(0,0,W*.48,H);bgGradient.addColorStop(0,'#e1efdb');bgGradient.addColorStop(.42,'#c7e7da');bgGradient.addColorStop(1,'#9fd6d0');
+ updateChargeTarget();
+}
+const palette=[{top:'#fcfbeb',edge:'#fffff3',side:'#d9dcc8',dark:'#c5cfbc'},{top:'#e1edc6',edge:'#f4f7dc',side:'#b4c9a5',dark:'#a4bea0'},{top:'#f4e4d6',edge:'#fff0e3',side:'#d3c2af',dark:'#c6bba7'},{top:'#e6e6f0',edge:'#f9f5fd',side:'#c3c4d6',dark:'#afb9cb'},{top:'#d5e9df',edge:'#edfaec',side:'#accdbe',dark:'#97bdb1'}];
+function buildPlatform(index,x,z,half,shape,kind,color){
+ const p={index,x,z,half,shape,kind,color,poly:[],topPath:new Path2D(),sidePath:new Path2D(),sideDark:new Path2D(),rimPath:new Path2D()};
+ if(shape==='round'){for(let i=0;i<48;i++){const a=-Math.PI/2+i*TAU/48;p.poly.push({x:Math.cos(a)*half,z:Math.sin(a)*half});}}
+ else {const r=12,centers=[[half-r,-half+r], [half-r,half-r],[-half+r,half-r],[-half+r,-half+r]];for(let k=0;k<4;k++)for(let i=0;i<=7;i++){const a=-Math.PI/2+k*Math.PI/2+i*Math.PI/14;p.poly.push({x:centers[k][0]+Math.cos(a)*r,z:centers[k][1]+Math.sin(a)*r});}}
+ const pts=p.poly.map(v=>({x:(v.x-v.z)*IX,y:(v.x+v.z)*IZ}));
+ pts.forEach((v,i)=>i?p.topPath.lineTo(v.x,v.y):p.topPath.moveTo(v.x,v.y));p.topPath.closePath();
+ for(let i=0;i<p.poly.length;i++){
+  const a=p.poly[i],b=p.poly[(i+1)%p.poly.length],dx=b.x-a.x,dz=b.z-a.z;
+  if(dz-dx>0.0001){const v=pts[i],n=pts[(i+1)%pts.length];const path=dz+dx>0?p.sidePath:p.sideDark;path.moveTo(v.x,v.y);path.lineTo(n.x,n.y);path.lineTo(n.x,n.y+TOP);path.lineTo(v.x,v.y+TOP);path.closePath();p.rimPath.moveTo(v.x,v.y+7);p.rimPath.lineTo(n.x,n.y+7);}
+ }
+ return p;
+}
+let lastDirection=0,sameDirection=0;
+function addPlatform(){
+ const last=platforms[platforms.length-1],i=last.index+1;
+ let dir=rng()>.5?1:0;if(i===1)dir=0;if(sameDirection>=2)dir=1-lastDirection;
+ sameDirection=dir===lastDirection?sameDirection+1:1;lastDirection=dir;
+ const progress=Math.min(i/50,1),distance=154+rng()*63+progress*42;
+ const half=Math.max(39,56-progress*14+(rng()-.5)*9);
+ const x=last.x-(dir===0?distance:0),z=last.z-(dir===1?distance:0);
+ const kind=i%7===0?'bonus':'normal',color=kind==='bonus'?{top:'#f5e9a9',edge:'#fff7d0',side:'#d6ca8d',dark:'#bfba80'}:palette[Math.floor(rng()*palette.length)];
+ platforms.push(buildPlatform(i,x,z,half,rng()>.66?'round':'square',kind,color));
+}
+function startRun(newMode='classic',preview=false){
+ stopHum();cancelInput();mode=newMode;runDate=dateKey();rng=seeded(preview?90731:mode==='daily'?hash('fruit-hop-v1:'+runDate):randomSeed());
+ platforms=[buildPlatform(0,0,0,61,'square','normal',palette[0])];lastDirection=0;sameDirection=0;for(let i=0;i<5;i++)addPlatform();
+ current=0;score=0;combo=0;maxCombo=0;jumps=0;perfectCount=0;charge=0;jump=null;landBounce=0;fallTime=0;overDelay=0;shake=0;recorded=false;
+ player={x:0,z:0,h:TOP,rot:0};runBestBefore=mode==='daily'?dailyInfo(runDate).best:saved.best;
+ for(const p of particles)p.life=0;for(const r of ripples)r.life=0;for(const l of labels)l.life=0;
+ camX=platforms[1].x*.18;camZ=platforms[1].z*.18;
+ active=!preview;gameState='ready';anchorX=W*(preview?(W<=700&&H>W?.55:.72):.5);anchorY=H*(preview?(W<=700&&H>W?.42:.65):.65);
+ showScreen(preview?'home':null);updateHUD();updateSettings();setHold('按住屏幕蓄力 · 松手跳跃');resetChargeUI();
+ if(!preview){initAudio();sound('click');live(mode==='daily'?'每日挑战开始。按住蓄力，松开跳跃。':'游戏开始。按住蓄力，松开跳跃。');if(!canStore)toast('浏览器未允许本地存储，本次纪录可能无法保存。');}
+}
+function showScreen(name){
+ screen=name;renderDirty=true;for(const [key,el] of Object.entries(screens))el.hidden=key!==name;
+ const playing=active&&!['home','over'].includes(name);
+ $('score-hud').hidden=!active||name==='over';$('control-hud').hidden=!active||name!==null||gameState==='dead';
+ $('pause-button').hidden=!active||name==='over';$('settings-button').hidden=active&&name!=='over';
+ $('hero-note').hidden=active||name!=='home';$('home-weather').hidden=active;$('run-stats').hidden=!active;
+ $('pause-button').disabled=name!==null;
+ $('records-button').disabled=name==='records';
+ if(name&&name!=='home'){
+  const el=screens[name];requestAnimationFrame(()=>{if(screen===name){const first=el.querySelector('button:not([disabled])');if(first)first.focus({preventScroll:true});}});
+ }else if(!name&&document.activeElement instanceof HTMLElement)document.activeElement.blur();
+ if(name==='home')setText($('header-best'),saved.best);
+}
+function pause(){if(!active||screen!==null||gameState==='dead')return;cancelCharge();setText($('pause-score'),score);showScreen('pause');stopHum();live('游戏已暂停。');}
+function resume(){if(!active||gameState==='dead')return;showScreen(null);initAudio();lastFrame=performance.now();setHold('按住屏幕蓄力 · 松手跳跃');updateChargeTarget();}
+function openModal(name){if(screen===name)return;if(active&&gameState==='dead'&&screen===null){overDelay=0;showResult();}if(active&&screen===null){cancelCharge();screenReturn='pause';setText($('pause-score'),score);}else screenReturn=screen||'home';stopHum();if(name==='records'){recordTab=mode==='daily'&&active?'daily':'classic';renderRecords();}updateSettings();showScreen(name);}
+function closeModal(){showScreen(screenReturn||'home');screenReturn='home';}
+function goHome(){if(active&&!recorded&&jumps>0)recordRun(true);active=false;startRun('classic',true);}
+function cancelInput(){if(pointerID!==null){try{canvas.releasePointerCapture(pointerID);}catch(_){}pointerID=null;}keyHeld=false;}
+function cancelCharge(){cancelInput();if(gameState==='charging'){gameState='ready';charge=0;resetChargeUI();}stopHum();}
+function beginCharge(){if(!active||screen!==null||gameState!=='ready')return false;initAudio();gameState='charging';charge=0;chargeStartedAt=performance.now();startHum();setHold('再按一会儿……松手就起跳');tickEl.hidden=false;return true;}
+function chargeDistance(q){return MIN_DIST+(MAX_DIST-MIN_DIST)*Math.pow(clamp(q,0,1),1.14);}
+function distanceCharge(d){return Math.pow(clamp((d-MIN_DIST)/(MAX_DIST-MIN_DIST),0,1),1/1.14);}
+function currentPlatform(){return platforms.find(p=>p.index===current);}
+function nextPlatform(){return platforms.find(p=>p.index===current+1);}
+function aim(){const p=nextPlatform();if(!p)return {x:-1,z:0,distance:180};const dx=p.x-player.x,dz=p.z-player.z,d=Math.hypot(dx,dz)||1;return {x:dx/d,z:dz/d,distance:d};}
+function releaseCharge(){
+ if(screen!==null||gameState!=='charging')return;
+ charge=Math.min(MAX_CHARGE,(performance.now()-chargeStartedAt)/1000);
+ const q=clamp(charge/MAX_CHARGE,0,1),dir=aim(),d=chargeDistance(q);
+ stopHum();jump={x:player.x,z:player.z,dx:dir.x*d,dz:dir.z*d,distance:d,time:0,duration:.44+d/MAX_DIST*.24,arc:73+d*.20};
+ gameState='jumping';landBounce=0;trailTimer=0;charge=0;resetChargeUI();setHold('乘着海风，出发！');sound('jump');
+}
+function resetChargeUI(){fillEl.style.transform='scaleX(0)';fillEl.style.background='#2b7453';tickEl.hidden=true;}
+function updateChargeTarget(){
+ if(!targetEl||!platforms.length)return;const dir=aim(),p=nextPlatform();if(!p)return;
+ const radius=perfectRadius(p),l=distanceCharge(dir.distance-radius),r=distanceCharge(dir.distance+radius);
+ targetEl.style.left=(l*100)+'%';targetEl.style.width=((r-l)*100)+'%';targetEl.hidden=!settings.assist;
+ setText($('charge-center-label'),settings.assist?'黄色区域 = 靶心力度':'按得越久，跳得越远');
+}
+function setHold(s){if(s!==lastHoldText){lastHoldText=s;setText(holdEl,s);}}
+function perfectRadius(p){return Math.min(15,p.half*.27);}
+function contains(p,x,z){const dx=Math.abs(x-p.x),dz=Math.abs(z-p.z);if(p.shape==='round')return dx*dx+dz*dz<=(p.half-1)*(p.half-1);const inner=p.half-12;if(dx>p.half-1||dz>p.half-1)return false;if(dx<=inner||dz<=inner)return true;return (dx-inner)**2+(dz-inner)**2<=121;}
+function updateHUD(){setText(scoreEl,String(score).padStart(2,'0'));setText($('stat-jumps'),jumps);setText($('stat-perfect'),perfectCount);$('combo-tag').hidden=combo<2;setText($('combo-number'),'×'+combo);setText($('mode-tag'),mode==='daily'?'每日挑战 · '+runDate.slice(5).replace('-',' / '):'经典航线 · 自由跳跃');setText($('header-best'),mode==='daily'?Math.max(score,dailyInfo(runDate).best):Math.max(score,saved.best));}
+function addLabel(x,z,text,sub='',color='#315e43'){const l=labels.find(p=>p.life<=0)||labels[0];Object.assign(l,{life:1.35,max:1.35,x,z,h:TOP+77,text,sub,color});}
+function burst(x,z,type,count){
+ if(settings.quality==='low')count=Math.ceil(count*.5);if(reduced)count=Math.min(count,5);
+ const color=FRUITS.find(f=>f.id===settings.fruit).color;
+ for(let i=0;i<count;i++){const p=particles.find(v=>v.life<=0);if(!p)break;const a=Math.random()*TAU,r=35+Math.random()*(type===2?110:45),life=.5+Math.random()*.4;
+ Object.assign(p,{life,max:life,x,z,h:type===2?3:TOP+3,vx:Math.cos(a)*r,vz:Math.sin(a)*r,vh:type===2?100+Math.random()*135:55+Math.random()*90,size:type===2?2+Math.random()*3.5:2+Math.random()*2,color:type===2?(i%3===0?'#effff3':'#84c9c4'):i%2?'#f5ecc0':color,type});}
+}
+function ripple(x,z,big=false){const r=ripples.find(v=>v.life<=0)||ripples[0];Object.assign(r,{life:big?1.3:.8,max:big?1.3:.8,x,z,r:big?22:6});}
+function land(){
+ const target=nextPlatform(),p=platforms.find(p=>contains(p,player.x,player.z));
+ if(p){
+  gameState='ready';player.h=TOP;player.rot=0;landBounce=.28;ripple(player.x,player.z);
+  if(p.index>current){
+   const skipped=p.index-current-1;
+   const perfect=Math.hypot(player.x-p.x,player.z-p.z)<=perfectRadius(p);jumps++;current=p.index;
+   let points=1;if(perfect){combo++;perfectCount++;maxCombo=Math.max(maxCombo,combo);points=Math.min(combo*2,10);sound('perfect',combo);vibrate(combo>1?[12,25,12]:12);burst(player.x,player.z,1,combo>2?18:11);}else{combo=0;sound('land');vibrate(7);burst(player.x,player.z,0,5);}
+   const bonus=p.kind==='bonus'?3:0;score+=points+bonus;
+   if(bonus){sound('bonus');addLabel(player.x,player.z,`果汁补给 +${points+bonus}`,perfect?'靶心命中 · 额外 +3':'额外奖励 +3','#8a783a');}
+   else if(skipped>0)addLabel(player.x,player.z,'一跃跨岛！',`+${points}${perfect?' · 靶心命中':''}`,'#47693c');
+   else if(perfect)addLabel(player.x,player.z,combo>1?`靶心连击 ×${combo}`:'正中靶心！',`+${points}`,'#47693c');
+   else addLabel(player.x,player.z,'+'+points,'稳稳落地','#456953');
+   if(mode==='classic'&&score>saved.best){saved.best=score;persist();}else if(mode==='daily'){const di=dailyInfo(runDate);if(score>di.best){saved.daily[runDate]={best:score,runs:di.runs};persist();}}
+   while(platforms[platforms.length-1].index<current+5)addPlatform();platforms=platforms.filter(p=>p.index>=current-2);
+   updateHUD();scoreEl.classList.remove('bump');void scoreEl.offsetWidth;scoreEl.classList.add('bump');updateChargeTarget();setHold(jumps<3?'继续按住 · 向下一块小岛出发':'按住蓄力 · 松手跳跃');live(`${perfect?'靶心命中，':''}得分 ${score}，成功跳跃 ${jumps} 次。`);
+  }else if(p.index===current){combo=0;updateHUD();sound('land');addLabel(player.x,player.z,'还在这座岛','再蓄力一点','#667b5a');updateChargeTarget();setHold('这次再多按一会儿');}
+  else {combo=0;updateHUD();updateChargeTarget();sound('land');setHold('按住蓄力 · 瞄准下一块小岛');}
+ }else{gameState='falling';fallTime=0;setHold('糟糕，脚下是水……');}
+}
+function splash(){gameState='dead';stopHum();cancelInput();player.h=-10;overDelay=.85;burst(player.x,player.z,2,38);ripple(player.x,player.z,true);const r=ripples.find(v=>v.life<=0);if(r)Object.assign(r,{life:1.6,max:1.6,x:player.x+4,z:player.z-4,r:9});shake=reduced?0:4;splashHistory++;sound('splash');vibrate([28,30,48]);$('control-hud').hidden=true;recordRun(false);live(`果子潮了。本次得分 ${score}。`);}
+function recordRun(abandoned=false){
+ if(recorded)return;recorded=true;
+ const r={score,jumps,perfect:perfectCount,combo:maxCombo,mode,date:new Date().toISOString(),day:runDate,fruit:settings.fruit,abandoned};
+ saved.records.push(r);saved.records=saved.records.sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date));
+ // Keep the 30 best classic and 30 best daily runs plus 20 most recent.
+ const keep=new Set([...saved.records.filter(r=>r.mode==='classic').slice(0,30),...saved.records.filter(r=>r.mode==='daily').slice(0,30),...saved.records.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20)]);saved.records=saved.records.filter(r=>keep.has(r));
+ if(mode==='daily'){const di=dailyInfo(runDate);saved.daily[runDate]={best:Math.max(di.best,score),runs:di.runs+1};const keys=Object.keys(saved.daily).sort().reverse();for(const key of keys.slice(60))delete saved.daily[key];}
+ else{saved.best=Math.max(saved.best,score);saved.runs++;}persist();
+}
+function showResult(){
+ setText($('result-score'),score);setText($('result-best'),mode==='daily'?dailyInfo(runDate).best:saved.best);setText($('result-best-label'),mode==='daily'?'今日最佳':'历史最佳');setText($('result-jumps'),jumps);setText($('result-combo'),maxCombo);$('new-record').hidden=score<=runBestBefore;
+ const comments=score===0?'万事开头难，果子也一样。':score<10?'海水不是果汁，下次记得看准一点。':maxCombo>=5?'连击很漂亮，最后一跳有点水。':score>=30?'这趟旅程够远了，再跳一次会更远。':'只是泡了个澡，勇气还在。';setText($('result-comment'),comments);drawFruitIcon($('wet-fruit'),settings.fruit,true);$('share-fallback').hidden=true;showScreen('over');
+}
+function renderRecords(){
+ const daily=recordTab==='daily',key=dateKey(),rows=saved.records.filter(r=>daily?r.mode==='daily'&&r.day===key:r.mode==='classic').sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date)).slice(0,6);
+ $('classic-tab').classList.toggle('active',!daily);$('daily-tab').classList.toggle('active',daily);$('classic-tab').setAttribute('aria-selected',String(!daily));$('daily-tab').setAttribute('aria-selected',String(daily));setText($('records-best'),daily?dailyInfo(key).best:saved.best);setText($('records-runs'),daily?dailyInfo(key).runs:saved.runs);
+ const list=$('leaderboard');list.replaceChildren();if(!rows.length){const empty=document.createElement('div');empty.className='empty-record';empty.textContent=daily?'今天的海，等你第一个出发。':'还没有脚印。去跳出第一份纪录吧。';list.append(empty);return;}
+ rows.forEach((r,i)=>{const row=document.createElement('div');row.className='leaderboard-row';const rank=document.createElement('div');rank.className='rank';rank.textContent=String(i+1).padStart(2,'0');const date=document.createElement('div');date.className='record-date';const d=new Date(r.date);date.textContent=Number.isNaN(d.getTime())?'本地记录':`${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}　${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;const sub=document.createElement('span');sub.textContent=(FRUITS.find(f=>f.id===r.fruit)?.name||'果子')+' · '+(r.jumps||0)+' 次跳跃'+(r.abandoned?' · 提前结束':'');date.append(sub);const value=document.createElement('div');value.className='record-value';value.textContent=r.score;row.append(rank,date,value);list.append(row);});
+}
+async function shareScore(){const text=`我在「果子跳跳」${mode==='daily'?'每日挑战 '+runDate:'经典航线'}拿到 ${score} 分，成功跳跃 ${jumps} 次，最高靶心连击 ${maxCombo} 次！虽然果子潮了，但下次还能更远。`;
+ if(navigator.share){try{await navigator.share({title:'果子跳跳 · 我的成绩',text});return;}catch(e){if(e.name==='AbortError')return;}}
+ if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text);toast('成绩已复制，发给朋友一起挑战。');return;}catch(_){}}
+ $('share-fallback').hidden=false;$('share-fallback').value=text;$('share-fallback').focus();$('share-fallback').select();try{if(document.execCommand('copy')){toast('成绩已复制，发给朋友一起挑战。');return;}}catch(_){}toast('长按或全选下方文字，即可复制成绩。');
+}
+function worldX(x,z){return anchorX+((x-camX)-(z-camZ))*IX*S+shakeX;}
+function worldY(x,z,h=0){return anchorY+((x-camX)+(z-camZ))*IZ*S-h*S+shakeY;}
+function drawWater(t){
+ ctx.fillStyle=bgGradient;ctx.fillRect(0,0,W,H);
+ // Screen-space ripples with gentle world-space parallax; bounded complexity.
+ const low=settings.quality==='low',count=low?24:waterMarks.length;
+ ctx.lineCap='round';ctx.lineWidth=1;
+ for(let i=0;i<count;i++){
+  const m=waterMarks[i],px=((m.x*W-(camX-camZ)*.14*S+Math.sin(t*.26+m.phase)*8)%(W+80)+(W+80))%(W+80)-40;
+  const py=((m.y*H-(camX+camZ)*.12*S)%(H+50)+(H+50))%(H+50)-25;
+  const opacity=.12+.075*Math.sin(t*.7+m.phase);ctx.strokeStyle=`rgba(255,255,237,${opacity})`;
+  ctx.beginPath();ctx.moveTo(px-m.len,py);ctx.quadraticCurveTo(px,py+3,px+m.len,py);ctx.stroke();
+  if(i%3===0){ctx.strokeStyle='rgba(79,139,125,.075)';ctx.beginPath();ctx.moveTo(px-7,py+5);ctx.quadraticCurveTo(px+3,py+7,px+17,py+5);ctx.stroke();}
+  if(!low&&m.kind===0){ctx.fillStyle=`rgba(251,255,227,${.3+Math.sin(t+m.phase)*.13})`;const a=1.5+Math.sin(t+m.phase)*.5;ctx.beginPath();ctx.moveTo(px+37,py-a*2);ctx.quadraticCurveTo(px+37,py,px+37+a*2,py);ctx.quadraticCurveTo(px+37,py,px+37,py+a*2);ctx.quadraticCurveTo(px+37,py,px+37-a*2,py);ctx.quadraticCurveTo(px+37,py,px+37,py-a*2);ctx.fill();}
+ }
+ // A few drifting petals and lily pads make the sea feel alive, without assets.
+ if(!low){for(let i=0;i<4;i++){const m=waterMarks[i*7+2];let px=((m.x*W-(camX-camZ)*.1*S)%(W+200)+W+200)%(W+200)-100,py=((m.y*H-(camX+camZ)*.1*S)%(H+140)+H+140)%(H+140)-70;ctx.save();ctx.translate(px,py+Math.sin(t*.6+i)*2);ctx.rotate(.3+i*1.1);ctx.globalAlpha=.34;if(i%2===0){ctx.fillStyle='#91b890';ctx.beginPath();ctx.ellipse(0,0,13,7,0,.22,TAU-.16);ctx.lineTo(0,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#dce9b5';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(-1,0);ctx.lineTo(-9,-2);ctx.stroke();}else{ctx.fillStyle='#fff3cf';ctx.beginPath();ctx.ellipse(0,0,5,2.4,0,0,TAU);ctx.fill();}ctx.restore();}}
+ for(const r of ripples){if(r.life<=0)continue;const u=1-r.life/r.max,rad=r.r+u*65;ctx.globalAlpha=(1-u)*.55;ctx.strokeStyle='#f2fff0';ctx.lineWidth=1.25;ctx.beginPath();ctx.ellipse(worldX(r.x,r.z),worldY(r.x,r.z),rad*S,rad*.39*S,0,0,TAU);ctx.stroke();ctx.globalAlpha=1;}
+}
+// Platform art is rasterized once per render scale. Each island is just one
+// cached image per frame; only the destination ring and water ripple animate.
+function bakePlatform(p){
+ const left=-p.half*2*IX-13,top=-p.half*2*IZ-8;
+ const width=-left*2,height=p.half*4*IZ+TOP+28,ratio=S*DPR;
+ const c=document.createElement('canvas');c.width=Math.ceil(width*ratio);c.height=Math.ceil(height*ratio);
+ const g=c.getContext('2d');g.scale(ratio,ratio);g.translate(-left,-top);
+ ellipse(g,0,TOP+5,p.half*1.24,p.half*.47,'rgba(58,122,109,.075)');
+ g.fillStyle=p.color.side;g.fill(p.sidePath);g.strokeStyle=p.color.side;g.lineWidth=.45;g.stroke(p.sidePath);
+ g.fillStyle=p.color.dark;g.fill(p.sideDark);g.strokeStyle=p.color.dark;g.stroke(p.sideDark);
+ g.strokeStyle='rgba(250,255,233,.35)';g.lineWidth=1;g.stroke(p.rimPath);
+ g.fillStyle=p.color.top;g.fill(p.topPath);g.strokeStyle=p.color.edge;g.lineWidth=1.4;g.stroke(p.topPath);
+ g.save();g.transform(IX,IZ,-IX,IZ,0,0);
+ if(p.kind==='bonus'){
+  ellipse(g,0,0,22,22,'#e4cd6c');ellipse(g,0,0,18.5,18.5,'#fff7d0');ellipse(g,0,0,15,15,'#e8c963');g.strokeStyle='#fff5c6';g.lineWidth=1.8;
+  for(let i=0;i<6;i++){const a=i*TAU/6;g.beginPath();g.moveTo(Math.cos(a)*3,Math.sin(a)*3);g.lineTo(Math.cos(a)*13,Math.sin(a)*13);g.stroke();}ellipse(g,0,0,3,3,'#fff7d0');
+ }else{
+  g.strokeStyle='rgba(95,128,89,.20)';g.lineWidth=1;g.beginPath();g.arc(0,0,18,0,TAU);g.stroke();ellipse(g,0,0,11,11,'#becdb93a');ellipse(g,0,0,3,3,'#99b58e69');
+  if(p.shape==='square'){g.strokeStyle='rgba(112,134,98,.12)';g.lineWidth=1;for(let i=-1;i<=1;i+=2){g.beginPath();g.moveTo(i*(p.half-12),-p.half+17);g.lineTo(i*(p.half-12),-p.half+26);g.stroke();}}
+ }
+ if(p.index>0){g.fillStyle='rgba(79,104,78,.3)';g.font='8px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';g.textAlign='center';g.fillText(String(p.index).padStart(2,'0'),0,p.half-12);}
+ g.restore();p.art={canvas:c,left,top,width:c.width/ratio,height:c.height/ratio};p.artVersion=artVersion;
+}
+function drawPlatform(p,t){
+ const x=worldX(p.x,p.z),y=worldY(p.x,p.z,TOP);if(x<-210*S||x>W+210*S||y<-160*S||y>H+150*S)return;
+ if(!p.art||p.artVersion!==artVersion)bakePlatform(p);
+ ctx.save();ctx.translate(x,y);ctx.scale(S,S);ctx.globalAlpha=p.index<current-1?.58:1;
+ const a=p.art;ctx.drawImage(a.canvas,a.left,a.top,a.width,a.height);
+ if(settings.quality!=='low'){ctx.strokeStyle='rgba(241,255,228,.36)';ctx.lineWidth=1.1;ctx.beginPath();ctx.ellipse(0,TOP+4,p.half*1.4+Math.sin(t*1.3+p.index)*2,p.half*.53,0,.15,Math.PI-.15);ctx.stroke();}
+ if(p.index===current+1&&(settings.assist||!active)){
+  ctx.save();ctx.transform(IX,IZ,-IX,IZ,0,0);ctx.strokeStyle=`rgba(115,148,78,${.30+Math.sin(t*3)*.08})`;ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.arc(0,0,27,0,TAU);ctx.stroke();ctx.setLineDash([]);if(p.kind!=='bonus')ellipse(ctx,0,0,11,11,'#cad8a535');ctx.restore();
+ }
+ if(p.kind==='bonus'&&p.index===current+1){ctx.fillStyle='#947c3b';ctx.font='600 10px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';ctx.textAlign='center';ctx.fillText('果汁岛 +3',0,-p.half*.7-16+Math.sin(t*2)*2);}
+ ctx.restore();
+}
+function drawAim(t){
+ if(!active){
+  const p=nextPlatform();if(!p)return;const x1=worldX(player.x,player.z),y1=worldY(player.x,player.z,TOP+7),x2=worldX(p.x,p.z),y2=worldY(p.x,p.z,TOP+5);
+  ctx.strokeStyle='#fcfbe185';ctx.lineWidth=1.5;ctx.setLineDash([3,7]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo((x1+x2)/2,(y1+y2)/2-107*S,x2,y2);ctx.stroke();ctx.setLineDash([]);return;
+ }
+ if(!settings.assist||gameState!=='charging'||screen!==null)return;
+ const q=clamp(charge/MAX_CHARGE,0,1),dir=aim(),d=chargeDistance(q),x=player.x+dir.x*d,z=player.z+dir.z*d,p=nextPlatform(),safe=contains(p,x,z),perfect=Math.hypot(x-p.x,z-p.z)<=perfectRadius(p);
+ const sx=worldX(x,z),sy=worldY(x,z,TOP+1);
+ ctx.save();ctx.strokeStyle=perfect?'#72894e':safe?'#6a9370':'#9b9270';ctx.lineWidth=1.3;ctx.globalAlpha=.72;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(worldX(player.x,player.z),worldY(player.x,player.z,TOP+3));ctx.quadraticCurveTo((worldX(player.x,player.z)+sx)/2,(worldY(player.x,player.z,TOP)+sy)/2-80*S,sx,sy);ctx.stroke();ctx.setLineDash([]);ctx.lineWidth=1.8;ctx.beginPath();ctx.ellipse(sx,sy,10*S,5*S,0,0,TAU);ctx.stroke();ellipse(ctx,sx,sy,2*S,1*S,ctx.strokeStyle);ctx.globalAlpha=.35;ctx.beginPath();ctx.ellipse(sx,sy,(14+Math.sin(t*8)*2)*S,7*S,0,0,TAU);ctx.stroke();ctx.restore();
+}
+function drawPlayer(t){
+ const isHome=!active;let h=player.h;if(isHome)h+=Math.sin(t*2)*2;
+ const x=worldX(player.x,player.z),groundY=worldY(player.x,player.z,TOP),elevation=Math.max(0,h-TOP);let baseY=worldY(player.x,player.z,h);
+ if(gameState!=='falling'&&gameState!=='dead'){
+  const on=platforms.some(p=>contains(p,player.x,player.z));const shY=on?groundY:worldY(player.x,player.z,0),sz=clamp(1-elevation/240,.45,1);ellipse(ctx,x,shY+1*S,20*S*sz,7.5*S*sz,`rgba(63,82,48,${on?.13:.06})`);
+ }
+ let sx=1,sy=1,rot=player.rot;
+ if(gameState==='charging'){const q=clamp(charge/MAX_CHARGE,0,1);sx=1+q*.19;sy=1-q*.24;rot=reduced?0:Math.sin(t*(20+q*15))*.011*q;}
+ else if(gameState==='jumping'){const u=jump.time/jump.duration;sy=1+.11*Math.sin(Math.PI*u);sx=1-.06*Math.sin(Math.PI*u);rot=Math.sin(u*TAU)*.07*(jump.dx>jump.dz?-1:1);}
+ else if(landBounce>0){const b=Math.sin((1-landBounce/.28)*Math.PI)*Math.exp(-(1-landBounce/.28)*1.6);sx=1+.20*b;sy=1-.2*b;}
+ if(gameState==='dead'){h=-10;baseY=worldY(player.x,player.z,h);sy=.91;rot=.2+Math.sin(t*2)*.05;}
+ ctx.save();ctx.translate(x,baseY);ctx.scale(S,S);
+ if(gameState==='dead'){ctx.beginPath();ctx.rect(-65,-100,130,95);ctx.clip();}
+ ctx.translate(0,-29*sy);ctx.rotate(rot);ctx.scale(sx,sy);ctx.drawImage(sprites[settings.fruit],-48,-61,96,104);
+ const mood=gameState==='charging'?'charge':gameState==='jumping'?'jump':['falling','dead'].includes(gameState)?'wet':'normal';drawFace(ctx,mood,t%5>4.85);ctx.restore();
+ if(gameState==='dead'){ctx.strokeStyle='#e1f2df';ctx.globalAlpha=.65;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(x,worldY(player.x,player.z,0),31*S,10*S,0,.1,Math.PI-.1);ctx.stroke();ctx.globalAlpha=1;}
+}
+function drawParticles(){
+ for(const p of particles){if(p.life<=0)continue;const alpha=clamp(p.life/Math.min(.35,p.max),0,1);ctx.globalAlpha=alpha;const x=worldX(p.x,p.z),y=worldY(p.x,p.z,p.h);ctx.fillStyle=p.color;
+  if(p.type===1){ctx.save();ctx.translate(x,y);ctx.rotate((p.max-p.life)*4);const r=p.size*S;ctx.beginPath();ctx.moveTo(0,-r*1.5);ctx.lineTo(r*.5,-r*.3);ctx.lineTo(r*1.5,0);ctx.lineTo(r*.3,r*.4);ctx.lineTo(0,r*1.5);ctx.lineTo(-r*.4,r*.3);ctx.lineTo(-r*1.5,0);ctx.lineTo(-r*.3,-r*.4);ctx.closePath();ctx.fill();ctx.restore();}
+  else{ctx.beginPath();ctx.ellipse(x,y,p.size*S,p.size*S*(p.type===2?1.35:.7),0,0,TAU);ctx.fill();}
+ }ctx.globalAlpha=1;
+ for(const l of labels){if(l.life<=0)continue;const u=1-l.life/l.max,alpha=Math.min(u*8,1)*Math.min(l.life*3,1),x=worldX(l.x,l.z),y=worldY(l.x,l.z,l.h+u*35);ctx.save();ctx.globalAlpha=alpha;ctx.textAlign='center';ctx.fillStyle=l.color;ctx.font=`700 ${Math.max(13,18*S)}px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif`;ctx.fillText(l.text,x,y);if(l.sub){ctx.fillStyle=l.sub.startsWith('+')?'#466a3c':'#718265';ctx.font=`600 ${Math.max(11,13*S)}px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif`;ctx.fillText(l.sub,x,y+22*S);}ctx.restore();}
+}
+function step(dt){
+ worldTime+=dt;
+ if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('toast').classList.remove('visible');}
+ if(shake>0){shake=Math.max(0,shake-dt*15);shakeX=Math.sin(worldTime*95)*shake;shakeY=Math.sin(worldTime*76)*shake*.55;}else shakeX=shakeY=0;
+ const isPreview=!active;
+ const targetAnchorX=W*(isPreview?(W<=700&&H>W?.55:.72):.5);
+ const targetAnchorY=H*(isPreview?(W<=700&&H>W?.42:.65):(H<520?.68:.67));
+ anchorX=lerp(anchorX,targetAnchorX,1-Math.exp(-dt*6));anchorY=lerp(anchorY,targetAnchorY,1-Math.exp(-dt*6));
+ if(active&&screen===null){
+  if(landBounce>0)landBounce=Math.max(0,landBounce-dt);
+  if(gameState==='charging'){
+   charge=Math.min(MAX_CHARGE,(performance.now()-chargeStartedAt)/1000);const q=charge/MAX_CHARGE;fillEl.style.transform=`scaleX(${q})`;tickEl.style.transform=`translateX(${q*$('charge-outer').clientWidth}px)`;
+   if(q>.985){setHold('蓄满了，松手起跳！');fillEl.style.background='#ad9250';}if(audio.chargeOsc&&audio.ctx){try{audio.chargeOsc.frequency.setTargetAtTime(145+q*225,audio.ctx.currentTime,.035);}catch(_){}}
+  }else if(gameState==='jumping'){
+   jump.time+=dt;const u=Math.min(1,jump.time/jump.duration);player.x=jump.x+jump.dx*u;player.z=jump.z+jump.dz*u;player.h=TOP+4*jump.arc*u*(1-u);
+   if(!reduced&&settings.quality!=='low'){trailTimer+=dt;if(trailTimer>.043){trailTimer=0;const p=particles.find(v=>v.life<=0);if(p)Object.assign(p,{life:.27,max:.27,x:player.x,z:player.z,h:player.h+15,vx:0,vz:0,vh:-12,size:2.1,color:'#fffae0',type:0});}}
+   if(u>=1)land();
+  }else if(gameState==='falling'){
+   fallTime+=dt;const u=clamp(fallTime/.27,0,1);player.h=TOP-64*u*u;player.x+=jump.dx/jump.duration*dt*.13;player.z+=jump.dz/jump.duration*dt*.13;player.rot=u*.65*(jump.dx>jump.dz?-1:1);if(u>=1)splash();
+  }else if(gameState==='dead'&&overDelay>0){overDelay-=dt;if(overDelay<=0)showResult();}
+ }
+ // Camera anticipates the next platform, then settles without frame-rate dependence.
+ const next=nextPlatform();if(next){const a=active?.25:.18;cameraTarget.x=player.x+(next.x-player.x)*a;cameraTarget.z=player.z+(next.z-player.z)*a;}
+ if(screen===null||screen==='home'||!active){const rate=1-Math.exp(-dt*3.9);camX=lerp(camX,cameraTarget.x,rate);camZ=lerp(camZ,cameraTarget.z,rate);}
+ if(screen===null||!active||screen==='over'){
+  for(const p of particles){if(p.life<=0)continue;p.life-=dt;p.x+=p.vx*dt;p.z+=p.vz*dt;p.h+=p.vh*dt;p.vh-=dt*(p.type===2?410:230);if(p.type===2&&p.h<-3)p.life=0;}
+  for(const r of ripples)if(r.life>0)r.life-=dt;
+  for(const l of labels)if(l.life>0)l.life-=dt;
+ }
+}
+function render(){
+ ctx.setTransform(DPR,0,0,DPR,0,0);drawWater(reduced?0:worldTime);
+ // Platforms are generated in strictly decreasing isometric depth. Reverse draw
+ // keeps farther islands behind nearer ones, without sorting every frame.
+ let fruitDrawn=false;const depth=player.x+player.z;
+ for(let i=platforms.length-1;i>=0;i--){const p=platforms[i];if(!fruitDrawn&&p.x+p.z>depth+1&&!contains(p,player.x,player.z)){drawAim(worldTime);drawPlayer(worldTime);fruitDrawn=true;}drawPlatform(p,worldTime);}
+ if(!fruitDrawn){drawAim(worldTime);drawPlayer(worldTime);}drawParticles();
+}
+function frame(now){
+ const raw=lastFrame?(now-lastFrame)/1000:1/60;lastFrame=now;const dt=Math.min(raw,.05);
+ if(!document.hidden){step(dt);if(screen===null||screen==='home'||renderDirty){render();renderDirty=false;}elapsedForFPS+=raw;framesForFPS++;if(raw<.12)frameAverage=lerp(frameAverage,raw*1000,.025);
+  if(elapsedForFPS>=.65){fps=Math.round(framesForFPS/elapsedForFPS);if(settings.fps)setText($('fps'),fps+' FPS');elapsedForFPS=0;framesForFPS=0;}
+  // Auto quality only scales down after sustained slow frames, never the physics.
+  if(settings.quality==='auto'&&(screen===null||screen==='home')){qualityCooldown=Math.max(0,qualityCooldown-dt);if(frameAverage>22)slowSeconds+=dt;else slowSeconds=Math.max(0,slowSeconds-dt*.5);if(slowSeconds>3.5&&autoRatio>1&&qualityCooldown===0){autoRatio=Math.max(1,autoRatio-.25);slowSeconds=0;qualityCooldown=8;resize();}}
+ }
+ requestAnimationFrame(frame);
+}
+// Pointer capture makes releasing outside the original press area safe.
+canvas.addEventListener('pointerdown',e=>{if(e.button!==0||pointerID!==null||keyHeld)return;if(beginCharge()){e.preventDefault();pointerID=e.pointerId;try{canvas.setPointerCapture(e.pointerId);}catch(_){}}});
+canvas.addEventListener('pointerup',e=>{if(e.pointerId!==pointerID)return;e.preventDefault();pointerID=null;releaseCharge();try{canvas.releasePointerCapture(e.pointerId);}catch(_){} });
+canvas.addEventListener('pointercancel',e=>{if(e.pointerId===pointerID)cancelCharge();});
+canvas.addEventListener('lostpointercapture',e=>{if(e.pointerId===pointerID)cancelCharge();});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('keydown',e=>{
+ const form=/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||'');if(form&&e.code!=='Escape')return;
+ if(e.code==='Tab'&&screen&&screen!=='home'){const items=[...screens[screen].querySelectorAll('button:not([disabled]),input,select,textarea:not([hidden])')].filter(el=>!el.hidden);if(items.length){const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}return;}
+ if(e.repeat){if(e.code==='Space')e.preventDefault();return;}
+ if(e.code==='Space'){if(screen===null){e.preventDefault();if(pointerID===null&&!keyHeld&&beginCharge())keyHeld=true;}return;}
+ if(e.code==='Escape'||e.code==='KeyP'){e.preventDefault();if(screen===null)pause();else if(screen==='pause')resume();else if(['settings','help','records'].includes(screen))closeModal();return;}
+ if(e.code==='KeyM'){toggleSound();return;}
+ if(e.code==='KeyR'&&active&&!['settings','help','records'].includes(screen)){e.preventDefault();if(!recorded&&jumps>0)recordRun(true);startRun(mode);return;}
+ if(e.code==='Enter'&&document.activeElement?.tagName!=='BUTTON'){if(screen==='home'){e.preventDefault();startRun('classic');}else if(screen==='over'){e.preventDefault();startRun(mode);}}
+});
+window.addEventListener('keyup',e=>{if(e.code==='Space'&&keyHeld){e.preventDefault();keyHeld=false;releaseCharge();}});
+window.addEventListener('blur',()=>{if(active&&screen===null)pause();else cancelCharge();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(active&&screen===null)pause();stopHum();}else{lastFrame=performance.now();elapsedForFPS=0;framesForFPS=0;}});
+canvas.addEventListener('contextlost',e=>{e.preventDefault();if(active&&screen===null)pause();stopHum();});
+canvas.addEventListener('contextrestored',()=>{for(const f of FRUITS)sprites[f.id]=buildFruit(f.id);resize();renderDirty=true;toast(active?'画面已恢复，可以继续跳跃。':'画面已恢复。');});
+window.addEventListener('resize',resize,{passive:true});
+window.addEventListener('pagehide',()=>{stopHum();persist();});
+function toggleSound(){settings.sound=!settings.sound;if(settings.sound)initAudio();persist();updateSettings();if(settings.sound)sound('click');}
+$('start-button').addEventListener('click',()=>startRun('classic'));$('daily-button').addEventListener('click',()=>startRun('daily'));
+$('pause-button').addEventListener('click',pause);$('resume-button').addEventListener('click',resume);
+$('retry-button').addEventListener('click',()=>startRun(mode));$('restart-pause').addEventListener('click',()=>{if(!recorded&&jumps>0)recordRun(true);startRun(mode);});
+$('home-pause').addEventListener('click',goHome);$('home-over').addEventListener('click',goHome);
+$('brand-button').addEventListener('click',()=>{if(active&&screen===null)pause();else if(active&&screen==='over')goHome();else if(!active&&screen!=='home')showScreen('home');});
+$('sound-button').addEventListener('click',toggleSound);$('setting-sound').addEventListener('click',toggleSound);
+$('settings-button').addEventListener('click',()=>openModal('settings'));$('pause-settings').addEventListener('click',()=>openModal('settings'));
+$('help-button').addEventListener('click',()=>openModal('help'));$('pause-help').addEventListener('click',()=>openModal('help'));
+$('records-button').addEventListener('click',()=>openModal('records'));$('over-records').addEventListener('click',()=>openModal('records'));
+for(const b of document.querySelectorAll('[data-close]'))b.addEventListener('click',closeModal);
+for(const key of ['assist','haptic','fps'])$('setting-'+key).addEventListener('click',()=>{settings[key]=!settings[key];persist();updateSettings();if(key==='haptic'&&settings.haptic)vibrate(12);});
+$('setting-volume').addEventListener('input',e=>{settings.volume=Number(e.target.value);persist();updateSettings();});
+$('setting-quality').addEventListener('change',e=>{settings.quality=e.target.value;autoRatio=2;slowSeconds=0;persist();resize();updateSettings();});
+$('classic-tab').addEventListener('click',()=>{recordTab='classic';renderRecords();});$('daily-tab').addEventListener('click',()=>{recordTab='daily';renderRecords();});
+$('share-button').addEventListener('click',shareScore);
+$('fullscreen-button').addEventListener('click',async()=>{try{if(document.fullscreenElement){await document.exitFullscreen();}else if(document.documentElement.requestFullscreen){await document.documentElement.requestFullscreen();}else{toast('当前浏览器不支持网页全屏，可通过浏览器菜单进入。');}}catch(_){toast('浏览器暂未允许全屏，可在浏览器菜单中开启。');}});
+document.addEventListener('fullscreenchange',()=>{setText($('fullscreen-button'),document.fullscreenElement?'退出全屏':'进入全屏');resize();});
+// Prevent wheel / pinch page scrolling while preserving panel scrolling and form use.
+document.addEventListener('touchmove',e=>{if(!e.target.closest('.panel'))e.preventDefault();},{passive:false});
+buildPicker();resize();startRun('classic',true);updateSettings();requestAnimationFrame(frame);
+// Read-only diagnostics are exposed only with #debug. Normal runs contain no test UI.
+if(location.hash==='#debug')Object.defineProperty(window,'FruitHopDebug',{value:Object.freeze({
+ state:()=>({screen,mode,gameState,score,jumps,combo,maxCombo,perfectCount,current,charge,player:{...player},next:nextPlatform()?{x:nextPlatform().x,z:nextPlatform().z,half:nextPlatform().half,index:nextPlatform().index,shape:nextPlatform().shape}:null,platforms:platforms.map(p=>({x:p.x,z:p.z,index:p.index,half:p.half,kind:p.kind})),idealHold:distanceCharge(aim().distance)*MAX_CHARGE,fps,ratio:DPR,particles:particles.filter(p=>p.life>0).length,records:saved.records.length,canStore}),
+ })});
+})();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
