@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src https://beasxxexggnjcocdbtdl.supabase.co; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>成绩管理 · 果子跳跳</title><link rel="stylesheet" href="assets/admin.css">
+<script src="assets/config.js" defer></script><script src="assets/admin.bundle.js" type="module"></script>
+</head>
+<body><main>
+<header><div><span class="eyebrow">FRUIT HOP / ADMIN</span><h1>成绩管理</h1><p>审核每一份，跳过海的成绩。</p></div><a href="./">返回游戏 ↗</a></header>
+<section id="auth-panel" class="card">
+<h2>管理员登录</h2><p>仅已验证邮箱且获授权的管理员可以管理成绩。</p>
+<form id="login-form"><label>邮箱<input id="email" type="email" required autocomplete="username" maxlength="254"></label><label>密码<input id="password" type="password" required minlength="12" maxlength="128" autocomplete="current-password"></label><div class="actions"><button id="login" type="submit">登录</button><button id="register" type="button" class="secondary">首次设置账号</button></div></form>
+<p class="hint">首次使用：输入管理员邮箱并设置至少 12 位密码，点击“首次设置账号”，完成邮件验证后回来登录。密码只发送至 Supabase Auth。</p>
+</section>
+<p id="message" role="status" aria-live="polite"></p>
+<section id="dashboard" hidden>
+<div class="toolbar card"><span id="identity"></span><button id="logout" class="secondary">退出登录</button></div>
+<div class="toolbar"><label>审核状态<select id="filter"><option value="pending">待审核</option><option value="approved">已通过</option><option value="rejected">已拒绝</option><option value="all">全部</option></select></label><button id="refresh" class="secondary">刷新</button></div>
+<div class="card table-wrap"><table><thead><tr><th>昵称 / 时间</th><th>航线</th><th>成绩</th><th>跳跃 / 靶心 / 连击</th><th>时长</th><th>状态</th><th>操作</th></tr></thead><tbody id="scores"></tbody></table><p id="empty" hidden>暂无该状态的成绩。</p></div>
+<div class="pagination"><button id="previous" class="secondary">上一页</button><span id="page-label"></span><button id="next" class="secondary">下一页</button></div>
+<p class="hint">成绩由浏览器提交。数值校验和限流不能证明游戏真实性，请结合得分、跳跃和时长审核异常成绩。</p>
+</section>
+<noscript>请开启 JavaScript 以使用管理员页面。</noscript>
+</main></body></html>

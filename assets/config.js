@@ -1,0 +1,2 @@
+// Public browser keys only; RLS and the upload gateway enforce access.
+window.GZJUMP_CONFIG = Object.freeze({"url":"https://beasxxexggnjcocdbtdl.supabase.co","publishableKey":"sb_publishable_85hufMmFQvmLQt2Rz1Hcrw_S4t7BjAO","anonKey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlYXN4eGV4Z2duamNvY2RidGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMzI3OTQsImV4cCI6MjEwNTYwODc5NH0.Hgbzrj4jKN_kDagEgGdQhAzk2p-RhGRYJfzonnynPgE"});

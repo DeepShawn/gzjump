@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#c4e8df">
-<meta name="description" content="一颗果子，跳过整片海。单文件离线跳跃小游戏，支持鼠标、触屏与键盘。">
+<meta name="description" content="一颗果子，跳过整片海。轻量跳跃小游戏，支持本地纪录、云端成绩与鼠标、触屏、键盘。">
 <title>果子跳跳 · Fruit Hop</title>
 <style>
 :root{--ink:#193f36;--muted:#617e73;--green:#245c45;--lime:#e2ef99;--paper:#fbfcf3;--line:rgba(35,76,61,.12);--shadow:0 18px 65px rgba(30,86,66,.13);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);font-synthesis:none}
@@ -26,6 +27,7 @@
 @media(max-height:520px) and (orientation:landscape){.app-header{top:14px;left:24px;right:24px}.brand-mark{width:33px;height:33px}.brand-cn{font-size:14px}.brand-en{font-size:7px}.record-pill{min-height:33px;padding:7px 12px}.icon-button{width:33px;height:33px}.overlay.home{padding:63px 6vw 40px;display:flex;overflow:visible}.home-panel{position:relative;left:auto;right:auto;bottom:auto;width:340px}.small-tag{font-size:8px;padding:5px 9px}.home-panel h1{font-size:34px;margin:10px 0}.home-panel h1 .title-first{display:inline}.home-panel h1 span{display:block}.home-copy{font-size:10px;margin-bottom:13px}.start-actions{max-width:294px}.start-actions .primary-button{min-height:42px;font-size:12px;border-radius:12px}.daily-button{font-size:10px;min-height:40px;padding:5px 10px;min-width:90px;border-radius:12px}.fruit-picker{margin-top:14px;display:flex;align-items:center;gap:12px}.section-caption{font-size:9px}.section-caption::after{display:none}.fruit-row{gap:6px;margin-top:0}.fruit-option{width:29px;height:29px}.fruit-option canvas{width:27px;height:30px}.home-meta,.scene-label{display:none}.footer{bottom:13px;font-size:9px}.weather{font-size:8px}.panel{max-height:calc(100dvh - 55px);padding:22px;width:410px}.overlay:not(.home){padding:40px 20px 15px}.result-panel{width:450px}.result-panel .wet-icon{width:45px;height:45px;margin:0 auto}.wet-title{font-size:25px!important}.result-sub{margin:4px 0 10px}.result-score{font-size:48px}.result-grid{margin-top:12px;padding:10px 6px}.result-grid strong{font-size:17px}.result-grid span{margin-top:3px}.result-panel .panel-actions{margin-top:15px}.result-panel .primary-button,.result-panel .secondary-button{min-height:42px}.result-bottom{margin-top:10px}.new-record{margin-top:6px;padding:4px 8px}#score-hud{top:66px}.score-number{font-size:45px}.score-label{font-size:8px}.mode-tag{display:none}#control-hud{bottom:40px;width:250px}.hold-hint{font-size:10px;margin-bottom:8px}.charge-labels{margin-top:6px;font-size:8px}.panel .pause-symbol{display:none}.pause-panel .panel-header{margin-bottom:10px}.pause-panel .panel-subtitle{margin-bottom:10px}.pause-score{margin-top:10px;padding:10px 15px}.pause-panel .panel-actions{margin-top:15px}.pause-panel .primary-button,.pause-panel .secondary-button{min-height:40px}}
 @media(max-width:350px){.fruit-picker .section-caption{max-width:40px;line-height:1.5;flex-shrink:1;font-size:8px}.fruit-picker{gap:9px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.cloud-submit{margin-top:20px;text-align:left;border-top:1px solid var(--line);padding-top:16px}.cloud-submit label{display:block;font-size:11px;color:var(--muted);margin-bottom:8px}.cloud-input-row{display:flex;gap:8px}.cloud-input-row input{min-width:0;width:100%;padding:10px 12px;border:1px solid #c6d8c5;border-radius:10px;background:#fff;color:var(--ink);user-select:text}.cloud-input-row button{padding:10px 14px;white-space:nowrap;background:var(--green);color:#fff;border-radius:10px;font-size:12px}.cloud-submit p,#cloud-status{font-size:10px;color:var(--muted);line-height:1.8;margin:9px 0}.cloud-title{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:20px;padding-top:16px}.cloud-title h3{font-size:14px;margin:0}
 </style>
 </head>
 <body>
@@ -67,7 +69,7 @@
  <div class="panel result-panel" role="dialog" aria-modal="true" aria-labelledby="over-title">
   <canvas id="wet-fruit" class="wet-icon" width="164" height="164" aria-hidden="true"></canvas><div class="eyebrow">A LITTLE TOO JUICY</div><h2 class="wet-title" id="over-title">果子潮了</h2><p class="result-sub" id="result-comment">海水不是果汁，下次记得跳远一点。</p><div class="result-score" id="result-score">0</div><div class="new-record" id="new-record" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 2H11V6A3 3 0 0 1 5 6V2ZM5 3H2V5Q2 7 5 7M11 3H14V5Q14 7 11 7M8 9V13M5 14H11"/></svg>刷新本地纪录</div>
   <div class="result-grid"><div><strong id="result-best">0</strong><span id="result-best-label">历史最佳</span></div><div><strong id="result-jumps">0</strong><span>成功跳跃</span></div><div><strong id="result-combo">0</strong><span>最高靶心连击</span></div></div>
-  <div class="panel-actions"><button class="primary-button" id="retry-button">捞起来，再跳一次<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8A8 8 0 1 0 20 16M20 3V8H15"/></svg></button></div><div class="result-bottom"><button class="text-button" id="home-over">返回首页</button><button class="text-button" id="share-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V3M7 8L12 3L17 8M5 13V20H19V13"/></svg>分享成绩</button><button class="text-button" id="over-records">本地榜单</button></div><textarea id="share-fallback" readonly hidden aria-label="分享文字，长按或全选复制"></textarea>
+  <div class="panel-actions"><button class="primary-button" id="retry-button">捞起来，再跳一次<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8A8 8 0 1 0 20 16M20 3V8H15"/></svg></button></div><div class="result-bottom"><button class="text-button" id="home-over">返回首页</button><button class="text-button" id="share-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V3M7 8L12 3L17 8M5 13V20H19V13"/></svg>分享成绩</button><button class="text-button" id="over-records">本地榜单</button></div><div class="cloud-submit"><label for="player-name">榜单昵称</label><div class="cloud-input-row"><input id="player-name" maxlength="20" placeholder="你的昵称" autocomplete="nickname"><button id="upload-score" disabled>上传成绩</button></div><p id="upload-status" role="status" aria-live="polite">完成本局后可上传，审核通过后进入云端榜单。</p></div><textarea id="share-fallback" readonly hidden aria-label="分享文字，长按或全选复制"></textarea>
  </div>
 </section>
 <section class="overlay" id="settings-screen" hidden>
@@ -92,7 +94,7 @@
 <section class="overlay" id="records-screen" hidden>
  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="records-title">
   <div class="panel-header"><div><div class="eyebrow">YOUR LITTLE MILESTONES</div><h2 id="records-title">每一步，都算数。</h2></div><button class="close-button" data-close aria-label="关闭纪录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6L18 18M18 6L6 18"/></svg></button></div>
-  <div class="record-tabs" role="tablist" aria-label="纪录类型"><button class="record-tab active" id="classic-tab" role="tab" aria-selected="true">经典航线</button><button class="record-tab" id="daily-tab" role="tab" aria-selected="false">今日挑战</button></div><div class="record-summary"><div><b id="records-best">0</b><span>最佳得分</span></div><div><b id="records-runs">0</b><span>完成局数</span></div></div><div class="leaderboard-head"><span>名次</span><span>出发时间 / 水果</span><span style="text-align:right">得分</span></div><div id="leaderboard"></div><div class="record-notice">仅记录此浏览器的成绩，不是在线排名。<br>清除网站数据或更换浏览器后，纪录可能丢失。</div>
+  <div class="record-tabs" role="tablist" aria-label="纪录类型"><button class="record-tab active" id="classic-tab" role="tab" aria-selected="true">经典航线</button><button class="record-tab" id="daily-tab" role="tab" aria-selected="false">今日挑战</button></div><div class="record-summary"><div><b id="records-best">0</b><span>最佳得分</span></div><div><b id="records-runs">0</b><span>完成局数</span></div></div><div class="leaderboard-head"><span>名次</span><span>出发时间 / 水果</span><span style="text-align:right">得分</span></div><div id="leaderboard"></div><div class="record-notice">仅记录此浏览器的成绩，不是在线排名。<br>清除网站数据或更换浏览器后，纪录可能丢失。</div><div class="cloud-title"><h3>云端榜单</h3><button class="text-button" id="refresh-cloud">刷新</button></div><p id="cloud-status" role="status" aria-live="polite"></p><div id="cloud-leaderboard"></div>
  </div>
 </section>
 <section id="control-hud" hidden>
@@ -103,7 +105,7 @@
 <script>
 'use strict';
 (() => {
-/* Fruit Hop — entirely self-contained, no network requests, external assets or libraries.
+/* Fruit Hop — offline gameplay with optional Supabase score submission.
    Orthographic 2.5D Canvas renderer; analytic, elapsed-time-based jump physics.
    One animation loop, bounded particles, prebuilt geometry, cached fruit sprites.
    Controls: Pointer / Space = hold/release; Esc/P = pause; R = restart; M = sound. */
@@ -139,7 +141,7 @@ let player={x:0,z:0,h:TOP,rot:0},charge=0,chargeStartedAt=0,jump=null,fallTime=0
 let pointerID=null,keyHeld=false,toastTimer=0,recordTab='classic',shake=0,shakeX=0,shakeY=0,homeBias=1,lastHoldText='';
 const cameraTarget={x:0,z:0};
 const audio={ctx:null,master:null,chargeOsc:null,chargeGain:null,noise:null};
-let splashHistory=0;
+let splashHistory=0,runID=null,runStartedAt=0;
 const particles=Array.from({length:96},()=>({life:0,max:1,x:0,z:0,h:0,vx:0,vz:0,vh:0,size:2,color:'#ffffff',type:0}));
 const ripples=Array.from({length:14},()=>({life:0,max:1,x:0,z:0,r:1}));
 const labels=Array.from({length:6},()=>({life:0,max:1,x:0,z:0,h:0,text:'',sub:'',color:'#315c40'}));
@@ -240,7 +242,7 @@ function addPlatform(){
  platforms.push(buildPlatform(i,x,z,half,rng()>.66?'round':'square',kind,color));
 }
 function startRun(newMode='classic',preview=false){
- stopHum();cancelInput();mode=newMode;runDate=dateKey();rng=seeded(preview?90731:mode==='daily'?hash('fruit-hop-v1:'+runDate):randomSeed());
+ stopHum();cancelInput();mode=newMode;runDate=dateKey();runID=globalThis.crypto?.randomUUID?.()||null;runStartedAt=performance.now();window.dispatchEvent(new CustomEvent('fruit-hop:start'));rng=seeded(preview?90731:mode==='daily'?hash('fruit-hop-v1:'+runDate):randomSeed());
  platforms=[buildPlatform(0,0,0,61,'square','normal',palette[0])];lastDirection=0;sameDirection=0;for(let i=0;i<5;i++)addPlatform();
  current=0;score=0;combo=0;maxCombo=0;jumps=0;perfectCount=0;charge=0;jump=null;landBounce=0;fallTime=0;overDelay=0;shake=0;recorded=false;
  player={x:0,z:0,h:TOP,rot:0};runBestBefore=mode==='daily'?dailyInfo(runDate).best:saved.best;
@@ -326,6 +328,7 @@ function splash(){gameState='dead';stopHum();cancelInput();player.h=-10;overDela
 function recordRun(abandoned=false){
  if(recorded)return;recorded=true;
  const r={score,jumps,perfect:perfectCount,combo:maxCombo,mode,date:new Date().toISOString(),day:runDate,fruit:settings.fruit,abandoned};
+ if(!abandoned&&runID)window.dispatchEvent(new CustomEvent('fruit-hop:complete',{detail:{id:runID,score,jumps,perfect:perfectCount,combo:maxCombo,mode,day:runDate,fruit:settings.fruit,duration_ms:Math.round(performance.now()-runStartedAt)}}));
  saved.records.push(r);saved.records=saved.records.sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date));
  // Keep the 30 best classic and 30 best daily runs plus 20 most recent.
  const keep=new Set([...saved.records.filter(r=>r.mode==='classic').slice(0,30),...saved.records.filter(r=>r.mode==='daily').slice(0,30),...saved.records.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20)]);saved.records=saved.records.filter(r=>keep.has(r));
@@ -533,5 +536,7 @@ if(location.hash==='#debug')Object.defineProperty(window,'FruitHopDebug',{value:
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","spa":2}' crossorigin="anonymous"></script>
+<script src="assets/config.js" defer></script>
+<script src="assets/cloud.js" defer></script>
 </body>
 </html>

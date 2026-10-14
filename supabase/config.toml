@@ -1,0 +1,3 @@
+project_id = "gzjump"
+[functions.gzjump-submit]
+verify_jwt = true
