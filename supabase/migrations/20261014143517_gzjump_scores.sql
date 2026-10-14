@@ -33,8 +33,9 @@ revoke all on public.gzjump_scores from anon, authenticated;
 grant select on public.gzjump_scores to anon, authenticated;
 grant update(status), delete on public.gzjump_scores to authenticated;
 grant all on public.gzjump_scores, public.gzjump_admins to service_role;
-create policy scores_read on public.gzjump_scores for select to anon, authenticated
-  using (status = 'approved' or exists (select 1 from public.gzjump_admins where user_id = (select auth.uid())));
+create policy scores_public_read on public.gzjump_scores for select to anon using (status = 'approved');
+create policy scores_admin_read on public.gzjump_scores for select to authenticated
+  using (exists (select 1 from public.gzjump_admins where user_id = (select auth.uid())));
 create policy scores_admin_update on public.gzjump_scores for update to authenticated
   using (exists (select 1 from public.gzjump_admins where user_id = (select auth.uid())))
   with check (exists (select 1 from public.gzjump_admins where user_id = (select auth.uid())));
