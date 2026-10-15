@@ -34,15 +34,16 @@ Deno.serve(async (req: Request) => {
     const fingerprint = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join('');
     const identityDigest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-player:' + payload.device_id));
     const playerKey = Array.from(new Uint8Array(identityDigest), b => b.toString(16).padStart(2,'0')).join('');
-    const result = await fetch(Deno.env.get('SUPABASE_URL') + '/rest/v1/rpc/gzjump_submit', {
-      method:'POST', headers:{apikey:serviceKey, Authorization:'Bearer ' + serviceKey, 'Content-Type':'application/json'},
-      body:JSON.stringify({p_fingerprint:fingerprint, p_payload:payload}), signal:AbortSignal.timeout(10000)
+    const result = await fetch(Deno.env.get('SUPABASE_URL') + '/rest/v1/gzjump_scores', {
+      method:'POST',
+      headers:{apikey:serviceKey, Authorization:'Bearer '+serviceKey, 'Content-Type':'application/json', Prefer:'return=minimal'},
+      body:JSON.stringify({id:payload.id, player_key:playerKey, player_name:payload.player_name, score:payload.score, jumps:payload.jumps, perfect:payload.perfect, combo:payload.combo, mode:payload.mode, day:payload.day, fruit:payload.fruit, duration_ms:payload.duration_ms, assist:false}),
+      signal:AbortSignal.timeout(10000)
     });
     if (!result.ok) {
       const detail = await result.text();
-      if (detail.includes('RATE_LIMITED')) return reply(429, {error:'上传过于频繁，请稍后再试'});
-      if (detail.includes('AIM_ASSIST_NOT_ALLOWED')) return reply(400, {error:'开启新手瞄准时禁止上传成绩'});
-      console.error('gzjump database submission failed', result.status);
+      if (result.status === 409 || detail.includes('duplicate')) return reply(409, {error:'这局成绩已经提交过了'});
+      console.error('gzjump database submission failed', result.status, detail.slice(0, 200));
       return reply(503, {error:'成绩暂未保存，请稍后重试'});
     }
     return reply(200, {id:payload.id, status:'pending'});
