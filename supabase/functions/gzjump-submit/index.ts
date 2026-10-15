@@ -32,7 +32,7 @@ Deno.serve(async (req: Request) => {
     const hmac = await crypto.subtle.importKey('raw', new TextEncoder().encode(serviceKey), {name:'HMAC', hash:'SHA-256'}, false, ['sign']);
     const digest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-rate:' + ip));
     const fingerprint = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join('');
-    const identityDigest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-player:' + ip + ':' + payload.device_id));
+    const identityDigest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-player:' + payload.device_id));
     const playerKey = Array.from(new Uint8Array(identityDigest), b => b.toString(16).padStart(2,'0')).join('');
     const result = await fetch(Deno.env.get('SUPABASE_URL') + '/rest/v1/rpc/gzjump_submit', {
       method:'POST', headers:{apikey:serviceKey, Authorization:'Bearer ' + serviceKey, 'Content-Type':'application/json'},
