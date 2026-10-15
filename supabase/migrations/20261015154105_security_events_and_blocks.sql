@@ -21,3 +21,6 @@ revoke all on public.gzjump_blocks from anon, authenticated;
 grant all on public.gzjump_blocks to service_role;
 alter table public.gzjump_scores add column if not exists risk_flags text[] not null default '{}';
 alter table public.gzjump_scores add column if not exists risk_score integer not null default 0 check (risk_score between 0 and 100);
+grant select, insert, update, delete on public.gzjump_blocks, public.gzjump_security_events to authenticated;
+create policy blocks_admin_access on public.gzjump_blocks for all to authenticated using (exists (select 1 from public.gzjump_admins where user_id=(select auth.uid()))) with check (exists (select 1 from public.gzjump_admins where user_id=(select auth.uid())));
+create policy events_admin_read on public.gzjump_security_events for select to authenticated using (exists (select 1 from public.gzjump_admins where user_id=(select auth.uid())));
