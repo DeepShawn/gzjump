@@ -10,11 +10,18 @@
     status.textContent = '完成本局后可上传，审核通过后进入云端榜单。';
   });
   window.addEventListener('fruit-hop:complete', event => {
-    completed = Object.freeze({...event.detail}); button.disabled = uploading;
-    status.textContent = '成绩只会在你点击上传后提交，昵称将在榜单公开。';
+    completed = Object.freeze({...event.detail});
+    if (completed.assist) {
+      button.disabled = true;
+      status.textContent = '本局开启了靶心辅助，成绩已自动拒绝上传。请关闭辅助并重新开始一局。';
+      window.alert('成绩上传已拒绝：本局开启了“靶心辅助验证”。请关闭辅助后重新开始一局。');
+    } else {
+      button.disabled = uploading;
+      status.textContent = '成绩只会在你点击上传后提交，昵称将在榜单公开。';
+    }
   });
   button.addEventListener('click', async () => {
-    if (!completed || uploading) return;
+    if (!completed || completed.assist || uploading) return;
     const player_name = name.value.trim();
     if (!player_name || [...player_name].length > 20 || /[\p{Cc}\p{Cf}<>]/u.test(player_name)) {
       status.textContent = '请输入 1–20 个字符的昵称，不能含控制字符或尖括号。'; name.focus(); return;

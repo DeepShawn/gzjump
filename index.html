@@ -328,7 +328,7 @@ function splash(){gameState='dead';stopHum();cancelInput();player.h=-10;overDela
 function recordRun(abandoned=false){
  if(recorded)return;recorded=true;
  const r={score,jumps,perfect:perfectCount,combo:maxCombo,mode,date:new Date().toISOString(),day:runDate,fruit:settings.fruit,abandoned};
- if(!abandoned&&runID)window.dispatchEvent(new CustomEvent('fruit-hop:complete',{detail:{id:runID,score,jumps,perfect:perfectCount,combo:maxCombo,mode,day:runDate,fruit:settings.fruit,duration_ms:Math.round(performance.now()-runStartedAt)}}));
+ if(!abandoned&&runID)window.dispatchEvent(new CustomEvent('fruit-hop:complete',{detail:{id:runID,score,jumps,perfect:perfectCount,combo:maxCombo,mode,day:runDate,fruit:settings.fruit,duration_ms:Math.round(performance.now()-runStartedAt),assist:settings.assist}}));
  saved.records.push(r);saved.records=saved.records.sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date));
  // Keep the 30 best classic and 30 best daily runs plus 20 most recent.
  const keep=new Set([...saved.records.filter(r=>r.mode==='classic').slice(0,30),...saved.records.filter(r=>r.mode==='daily').slice(0,30),...saved.records.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20)]);saved.records=saved.records.filter(r=>keep.has(r));
