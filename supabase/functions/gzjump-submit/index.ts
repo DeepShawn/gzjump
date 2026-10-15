@@ -1,6 +1,13 @@
 import { validateSubmission } from './validation.js';
 const allowedOrigins = new Set(['https://deepshawn.github.io', 'http://localhost:4173', 'http://127.0.0.1:4173']);
 const rateBuckets = new Map<string, {minute:number; minuteCount:number; day:string; dayCount:number; last:number}>();
+async function getAuthenticatedUser(req: Request, url: string): Promise<{id:string}|null> {
+  const bearer = req.headers.get('authorization') || ''; const apikey = req.headers.get('apikey') || '';
+  if (!bearer.startsWith('Bearer ') || bearer.slice(7) === apikey) return null;
+  const response = await fetch(url + '/auth/v1/user', {headers:{apikey, Authorization:bearer}, signal:AbortSignal.timeout(5000)});
+  if (!response.ok) return null; const user = await response.json();
+  return typeof user?.id === 'string' ? {id:user.id} : null;
+}
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get('origin') || '';
   const headers = {'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin','Cache-Control':'no-store'};
@@ -27,6 +34,7 @@ Deno.serve(async (req: Request) => {
     try {payload = validateSubmission(JSON.parse(new TextDecoder().decode(body)));}
     catch (e) {return reply(400, {error: e instanceof SyntaxError ? 'JSON 格式无效' : (e as Error).message});}
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const authenticatedUser = await getAuthenticatedUser(req, Deno.env.get('SUPABASE_URL')!);
     // Supabase's gateway appends the trusted connecting address to X-Forwarded-For.
     const ip = req.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim();
     if (!ip) return reply(503, {error:'暂时无法验证请求来源，请稍后重试'});
@@ -43,7 +51,7 @@ Deno.serve(async (req: Request) => {
     const result = await fetch(Deno.env.get('SUPABASE_URL') + '/rest/v1/gzjump_scores', {
       method:'POST',
       headers:{apikey:serviceKey, Authorization:'Bearer '+serviceKey, 'Content-Type':'application/json', Prefer:'return=minimal'},
-      body:JSON.stringify({id:payload.id, player_key:playerKey, player_name:payload.player_name, score:payload.score, jumps:payload.jumps, perfect:payload.perfect, combo:payload.combo, mode:payload.mode, day:payload.day, fruit:payload.fruit, duration_ms:payload.duration_ms, assist:false}),
+      body:JSON.stringify({id:payload.id, player_key:playerKey, auth_user_id:authenticatedUser?.id || null, player_name:payload.player_name, score:payload.score, jumps:payload.jumps, perfect:payload.perfect, combo:payload.combo, mode:payload.mode, day:payload.day, fruit:payload.fruit, duration_ms:payload.duration_ms, assist:false, status:authenticatedUser ? 'approved' : 'pending'}),
       signal:AbortSignal.timeout(10000)
     });
     if (!result.ok) {

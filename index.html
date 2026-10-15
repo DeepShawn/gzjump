@@ -28,6 +28,7 @@
 @media(max-width:350px){.fruit-picker .section-caption{max-width:40px;line-height:1.5;flex-shrink:1;font-size:8px}.fruit-picker{gap:9px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 .cloud-submit{margin-top:20px;text-align:left;border-top:1px solid var(--line);padding-top:16px}.cloud-submit label{display:block;font-size:11px;color:var(--muted);margin-bottom:8px}.cloud-input-row{display:flex;gap:8px}.cloud-input-row input{min-width:0;width:100%;padding:10px 12px;border:1px solid #c6d8c5;border-radius:10px;background:#fff;color:var(--ink);user-select:text}.cloud-input-row button{padding:10px 14px;white-space:nowrap;background:var(--green);color:#fff;border-radius:10px;font-size:12px}.cloud-submit p,#cloud-status{font-size:10px;color:var(--muted);line-height:1.8;margin:9px 0}.cloud-title{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:20px;padding-top:16px}.cloud-title h3{font-size:14px;margin:0}
+.auth-popover{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:#193f3650;backdrop-filter:blur(8px)}.auth-card{width:min(390px,calc(100vw - 40px));position:relative;padding:28px;border-radius:24px;background:#fbfcf3;box-shadow:0 18px 65px #193f3638}.auth-card h2{margin:8px 0;font-size:25px}.auth-card p{font-size:12px;color:var(--muted);line-height:1.7}.auth-card input{width:100%;margin-top:10px;padding:12px;border:1px solid #c6d8c5;border-radius:10px;background:white;user-select:text}.auth-card button{width:100%;margin-top:10px;min-height:42px}.auth-close{position:absolute!important;right:14px;top:12px;width:32px!important;border-radius:50%;background:#e5eddd;color:var(--green);font-size:22px!important}.auth-card .text-button{background:none;color:var(--green)}
 </style>
 </head>
 <body>
@@ -39,7 +40,7 @@
     <span class="brand-cn">果子跳跳<span class="brand-en">FRUIT HOP</span></span>
   </button>
   <div class="header-actions">
-    <button class="record-pill" id="records-button" title="本地纪录" aria-label="查看本地纪录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H16V9C16 12 14 14 12 14C10 14 8 12 8 9V3Z"/><path d="M8 5H4V7C4 10 6 11 8 11M16 5H20V7C20 10 18 11 16 11M12 14V19M8 21H16M9 19H15"/></svg><span class="record-label">最高纪录</span><strong id="header-best">0</strong></button>
+    <button class="record-pill" id="auth-button" title="登录或游客模式">登录</button><button class="record-pill" id="records-button" title="本地纪录" aria-label="查看本地纪录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H16V9C16 12 14 14 12 14C10 14 8 12 8 9V3Z"/><path d="M8 5H4V7C4 10 6 11 8 11M16 5H20V7C20 10 18 11 16 11M12 14V19M8 21H16M9 19H15"/></svg><span class="record-label">最高纪录</span><strong id="header-best">0</strong></button>
     <button class="icon-button" id="sound-button" aria-label="关闭音效" title="音效（M）"></button>
     <button class="icon-button" id="settings-button" aria-label="设置" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7H20M4 17H20"/><rect x="8" y="4" width="4" height="6" rx="1.5" fill="#e4efe0"/><rect x="14" y="14" width="4" height="6" rx="1.5" fill="#e4efe0"/></svg></button>
     <button class="icon-button" id="pause-button" aria-label="暂停游戏" title="暂停（Esc / P）" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M8 5V19M16 5V19"/></svg></button>
@@ -101,7 +102,7 @@
  <div class="hold-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 13V5A2 2 0 0 1 13 5V11L15 10L19 12V17C19 20 17 22 14 22H12C10 22 8 21 7 19L4 14A2 2 0 0 1 7 12L9 14"/></svg><span id="hold-text">按住屏幕蓄力 · 松手跳跃</span></div><div class="charge-outer" id="charge-outer"><div class="charge-target" id="charge-target"></div><div class="charge-fill" id="charge-fill"></div><div class="charge-tick" id="charge-tick" hidden></div></div><div class="charge-labels"><span>轻轻一跳</span><span class="center-label" id="charge-center-label">黄色区域 = 靶心力度</span><span>跳远一点</span></div>
 </section>
 <footer class="footer"><div class="weather" id="home-weather"><span class="status-dot"></span>海面平静，适合起跳</div><div class="run-stats" id="run-stats" hidden>成功 <b id="stat-jumps">0</b> 靶心 <b id="stat-perfect">0</b></div><div class="footer-right"><button class="text-button" id="help-button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M8 7.5C8 5 13 5 12 8C11.5 9 10 9 10 11M10 14V14.1"/></svg>怎么玩</button><span class="fps" id="fps">— FPS</span></div></footer>
-<div id="toast" role="status"></div><div id="live-region" role="status" aria-live="polite"></div>
+<div id="auth-panel" class="auth-popover" hidden role="dialog" aria-modal="true" aria-labelledby="auth-title"><div class="auth-card"><button id="auth-close" class="auth-close" aria-label="关闭">×</button><div class="eyebrow">ACCOUNT</div><h2 id="auth-title">登录后保存成绩</h2><p id="auth-user">游客模式</p><form id="auth-form"><input id="auth-email" type="email" placeholder="邮箱" autocomplete="email" required><input id="auth-password" type="password" placeholder="密码（至少 12 位）" autocomplete="current-password" minlength="12" required><button id="auth-submit" class="primary-button" type="submit">登录</button><button id="auth-signup" class="secondary-button" type="button">注册邮箱账号</button><button id="auth-magic" class="text-button" type="button">发送魔法登录链接</button></form><button id="auth-logout" class="secondary-button" type="button" hidden>退出登录</button><p id="auth-status">游客可以直接游玩，但成绩需要管理员审核。</p></div></div><div id="toast" role="status"></div><div id="live-region" role="status" aria-live="polite"></div>
 <script>
 'use strict';
 (() => {
@@ -537,6 +538,7 @@ if(location.hash==='#debug')Object.defineProperty(window,'FruitHopDebug',{value:
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","spa":2}' crossorigin="anonymous"></script>
 <script src="assets/config.js" defer></script>
+<script src="assets/auth.js" defer></script>
 <script src="assets/cloud.js" defer></script>
 </body>
 </html>

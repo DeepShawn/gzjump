@@ -7,6 +7,8 @@
   const button = $('upload-score'), status = $('upload-status'), name = $('player-name');
   try {name.value = localStorage.getItem('gzjump_player_name') || '';} catch (_) {}
   const apiHeaders = {apikey:config.publishableKey};
+  const authToken = () => window.GZJUMP_AUTH?.getAccessToken?.() || null;
+  window.addEventListener('gzjump-auth-changed', () => { status.textContent = window.GZJUMP_AUTH?.isAuthenticated?.() ? '已认证：本局成绩提交后自动进入榜单。' : '游客成绩需要管理员审核。'; });
   window.addEventListener('fruit-hop:start', () => {
     sequence++; completed = null; button.disabled = true; button.textContent = '上传成绩';
     status.textContent = '完成本局后可上传，审核通过后进入云端榜单。';
@@ -32,7 +34,7 @@
     uploading = true; button.disabled = true; status.textContent = '正在上传…';
     try {
       const response = await fetch(config.url + '/functions/v1/gzjump-submit', {
-        method:'POST', headers:{apikey:config.anonKey, Authorization:'Bearer ' + config.anonKey, 'Content-Type':'application/json'},
+        method:'POST', headers:{apikey:config.anonKey, Authorization:'Bearer ' + (authToken() || config.anonKey), 'Content-Type':'application/json'},
         body:JSON.stringify({...snapshot, player_name, device_id:deviceId}), signal:AbortSignal.timeout(15000)
       });
       const data = await response.json();
