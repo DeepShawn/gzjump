@@ -41,6 +41,10 @@ async function loadScores() {
     const nameCell = cell(record.player_name); const time = document.createElement('small'); time.textContent = new Date(record.created_at).toLocaleString('zh-CN'); nameCell.append(time);
     cell(record.mode === 'daily' ? '每日 · '+record.day : '经典'); cell(String(record.score)); cell(`${record.jumps} / ${record.perfect} / ${record.combo}`); cell((record.duration_ms/1000).toFixed(1)+' 秒'); const risk = cell(record.risk_flags?.length ? record.risk_flags.join('、') + ' (' + record.risk_score + ')' : '正常'); if (record.risk_flags?.length) risk.style.color = '#934c39'; cell(labels[record.status]);
     const actions = cell('');
+    if (record.player_key) {
+      const ban = document.createElement('button'); ban.textContent = '封禁设备'; ban.className = 'danger';
+      ban.addEventListener('click', async () => { if (!confirm('确定封禁该设备？后续成绩将被拒绝。')) return; const until = new Date(Date.now()+365*86400000).toISOString(); const {error} = await client.from('gzjump_blocks').upsert({subject_key:record.player_key,violation_count:3,blocked_until:until,reason:'管理员手动封禁'},{onConflict:'subject_key'}); message(error ? '封禁失败，请重试。' : '设备已封禁。'); }); actions.append(ban);
+    }
     for (const [label,status] of [['通过','approved'],['拒绝','rejected'],['删除','delete']]) {
       if (record.status === status) continue;
       const button = document.createElement('button'); button.textContent = label; button.className = status === 'delete' ? 'danger' : 'secondary';
