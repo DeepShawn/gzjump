@@ -1,5 +1,6 @@
 import { validateSubmission } from './validation.js';
 const allowedOrigins = new Set(['https://deepshawn.github.io', 'http://localhost:4173', 'http://127.0.0.1:4173']);
+const rateBuckets = new Map<string, {minute:number; minuteCount:number; day:string; dayCount:number; last:number}>();
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get('origin') || '';
   const headers = {'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin','Cache-Control':'no-store'};
@@ -32,6 +33,11 @@ Deno.serve(async (req: Request) => {
     const hmac = await crypto.subtle.importKey('raw', new TextEncoder().encode(serviceKey), {name:'HMAC', hash:'SHA-256'}, false, ['sign']);
     const digest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-rate:' + ip));
     const fingerprint = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join('');
+    const nowMs = Date.now(); const minute = Math.floor(nowMs / 60000); const day = new Date(nowMs).toISOString().slice(0, 10);
+    const bucket = rateBuckets.get(fingerprint);
+    if (bucket && ((bucket.minute === minute && bucket.minuteCount >= 10) || (bucket.day === day && bucket.dayCount >= 100) || nowMs - bucket.last < 3000)) return reply(429, {error:'上传过于频繁，请稍后再试'});
+    rateBuckets.set(fingerprint, {minute, minuteCount: bucket?.minute === minute ? (bucket.minuteCount + 1) : 1, day, dayCount: bucket?.day === day ? (bucket.dayCount + 1) : 1, last: nowMs});
+    if (rateBuckets.size > 5000) for (const [key, value] of rateBuckets) if (nowMs - value.last > 86400000) rateBuckets.delete(key);
     const identityDigest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-player:' + payload.device_id));
     const playerKey = Array.from(new Uint8Array(identityDigest), b => b.toString(16).padStart(2,'0')).join('');
     const result = await fetch(Deno.env.get('SUPABASE_URL') + '/rest/v1/gzjump_scores', {
