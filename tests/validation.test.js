@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {validateSubmission} from '../supabase/functions/gzjump-submit/validation.js';
 const now = new Date('2026-10-14T12:00:00Z');
-const valid = {id:'39de07d5-8327-4659-8ac1-000ab75c2b0d',player_name:'海上的橘子',score:12,jumps:5,perfect:3,combo:2,mode:'daily',day:'2026-10-14',fruit:'orange',duration_ms:6500};
+const valid = {id:'39de07d5-8327-4659-8ac1-000ab75c2b0d',device_id:'39de07d5-8327-4659-8ac1-000ab75c2b0e',assist:false,player_name:'海上的橘子',score:12,jumps:5,perfect:3,combo:2,mode:'daily',day:'2026-10-14',fruit:'orange',duration_ms:6500};
 test('accepts valid completed runs, including a zero-score first fall',() => {
   assert.deepEqual(validateSubmission(valid,now),valid);
   assert.equal(validateSubmission({...valid,score:0,jumps:0,perfect:0,combo:0},now).score,0);

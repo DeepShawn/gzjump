@@ -1,7 +1,9 @@
 (() => {
   const config = window.GZJUMP_CONFIG;
   const $ = id => document.getElementById(id);
-  let completed = null, uploading = false, sequence = 0, boardSequence = 0;
+  let completed = null, uploading = false, sequence = 0, boardSequence = 0, deviceId = null;
+  try { deviceId = localStorage.getItem('gzjump_device_id'); } catch (_) {}
+  if (!deviceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(deviceId)) { deviceId = crypto.randomUUID(); try { localStorage.setItem('gzjump_device_id', deviceId); } catch (_) {} }
   const button = $('upload-score'), status = $('upload-status'), name = $('player-name');
   try {name.value = localStorage.getItem('gzjump_player_name') || '';} catch (_) {}
   const apiHeaders = {apikey:config.publishableKey};
@@ -31,7 +33,7 @@
     try {
       const response = await fetch(config.url + '/functions/v1/gzjump-submit', {
         method:'POST', headers:{apikey:config.anonKey, Authorization:'Bearer ' + config.anonKey, 'Content-Type':'application/json'},
-        body:JSON.stringify({...snapshot, player_name}), signal:AbortSignal.timeout(15000)
+        body:JSON.stringify({...snapshot, player_name, device_id:deviceId}), signal:AbortSignal.timeout(15000)
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || '上传失败，请稍后重试');
@@ -48,10 +50,10 @@
     const ticket = ++boardSequence;
     const mode = $('daily-tab').getAttribute('aria-selected') === 'true' ? 'daily' : 'classic';
     const list = $('cloud-leaderboard'); list.replaceChildren(); $('cloud-status').textContent = '正在读取云端榜单…';
-    const query = new URLSearchParams({select:'player_name,score,jumps,fruit,created_at',status:'eq.approved',mode:'eq.'+mode,order:'score.desc,created_at.asc',limit:'10'});
+    const query = new URLSearchParams({select:'player_name,score,jumps,fruit,created_at',mode:'eq.'+mode,order:'score.desc,created_at.asc',limit:'10'});
     if (mode === 'daily') query.set('day','eq.'+dayKey());
     try {
-      const response = await fetch(config.url + '/rest/v1/gzjump_scores?' + query, {headers:apiHeaders, signal:AbortSignal.timeout(10000)});
+      const response = await fetch(config.url + '/rest/v1/gzjump_leaderboard?' + query, {headers:apiHeaders, signal:AbortSignal.timeout(10000)});
       if (!response.ok) throw new Error('云端榜单暂不可用，本地成绩仍可查看。');
       const rows = await response.json(); if (ticket !== boardSequence) return;
       $('cloud-status').textContent = rows.length ? '仅展示审核通过的成绩 · 前 10 名' : '暂无审核通过的成绩，去留下你的第一份纪录吧。';

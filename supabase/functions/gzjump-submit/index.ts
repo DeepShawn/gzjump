@@ -30,8 +30,10 @@ Deno.serve(async (req: Request) => {
     const ip = req.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim();
     if (!ip) return reply(503, {error:'暂时无法验证请求来源，请稍后重试'});
     const hmac = await crypto.subtle.importKey('raw', new TextEncoder().encode(serviceKey), {name:'HMAC', hash:'SHA-256'}, false, ['sign']);
-    const digest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump:' + ip));
+    const digest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-rate:' + ip));
     const fingerprint = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join('');
+    const identityDigest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-player:' + ip + ':' + payload.device_id));
+    const playerKey = Array.from(new Uint8Array(identityDigest), b => b.toString(16).padStart(2,'0')).join('');
     const result = await fetch(Deno.env.get('SUPABASE_URL') + '/rest/v1/rpc/gzjump_submit', {
       method:'POST', headers:{apikey:serviceKey, Authorization:'Bearer ' + serviceKey, 'Content-Type':'application/json'},
       body:JSON.stringify({p_fingerprint:fingerprint, p_payload:payload}), signal:AbortSignal.timeout(10000)
@@ -39,6 +41,7 @@ Deno.serve(async (req: Request) => {
     if (!result.ok) {
       const detail = await result.text();
       if (detail.includes('RATE_LIMITED')) return reply(429, {error:'上传过于频繁，请稍后再试'});
+      if (detail.includes('AIM_ASSIST_NOT_ALLOWED')) return reply(400, {error:'开启新手瞄准时禁止上传成绩'});
       console.error('gzjump database submission failed', result.status);
       return reply(503, {error:'成绩暂未保存，请稍后重试'});
     }
