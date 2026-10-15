@@ -1,27 +1,34 @@
 package com.deepshawn.gzjump;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.webkit.CookieManager;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.view.Window;
-import android.graphics.Color;
+import android.app.*;
+import android.os.*;
+import android.graphics.*;
+import android.graphics.drawable.GradientDrawable;
+import android.view.*;
+import android.widget.*;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.*;
 
 public final class MainActivity extends Activity {
-  private WebView webView;
-  @Override public void onCreate(Bundle state) {
-    super.onCreate(state);
-    Window window = getWindow();
-    window.setStatusBarColor(Color.rgb(195,229,220));
-    window.getDecorView().setSystemUiVisibility(8192);
-    webView = new WebView(this); setContentView(webView);
-    WebSettings settings = webView.getSettings();
-    settings.setJavaScriptEnabled(true); settings.setDomStorageEnabled(true); settings.setDatabaseEnabled(true); settings.setSupportZoom(false);
-    settings.setUserAgentString(settings.getUserAgentString() + " GZJumpAndroid/1.0");
-    CookieManager.getInstance().setAcceptCookie(true); CookieManager.getInstance().setAcceptThirdPartyCookies(webView, false);
-    webView.setWebViewClient(new WebViewClient()); webView.loadUrl("https://deepshawn.github.io/gzjump/?platform=android");
+  static final String SUPABASE="https://beasxxexggnjcocdbtdl.supabase.co";
+  static final String ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzIiwicmVmIjoiYmVhc3h4ZXhnZ25qY29jZGJ0ZGwiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc5MDAzMjc5NCwiZXhwIjoyMTA1NjA4Nzk0fQ.Hgbzrj4jKN_kDagEgQhDgQy2p-RhGRYJfzonnynPgE";
+  GameView game; TextView score, status; Button auth, upload; String accessToken; String userEmail; final ExecutorService io=Executors.newSingleThreadExecutor();
+  @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(Color.rgb(195,229,220));getWindow().getDecorView().setSystemUiVisibility(8192); buildUi();}
+  void buildUi(){
+    FrameLayout root=new FrameLayout(this); root.setBackgroundColor(Color.rgb(195,229,220)); game=new GameView(); root.addView(game,new FrameLayout.LayoutParams(-1,-1));
+    LinearLayout top=new LinearLayout(this); top.setPadding(24,20,18,0); top.setGravity(Gravity.CENTER_VERTICAL); TextView title=new TextView(this); title.setText("果子跳跳");title.setTextSize(20);title.setTextColor(Color.rgb(25,63,54)); title.setTypeface(null,1); top.addView(title,new LinearLayout.LayoutParams(0,60,1)); auth=new Button(this);auth.setText("登录");auth.setOnClickListener(v->authDialog());top.addView(auth,new LinearLayout.LayoutParams(120,55));root.addView(top,new FrameLayout.LayoutParams(-1,80,Gravity.TOP));
+    LinearLayout bottom=new LinearLayout(this);bottom.setPadding(24,0,24,25);bottom.setOrientation(LinearLayout.VERTICAL);status=new TextView(this);status.setText("按住屏幕蓄力，松手跳跃");status.setTextColor(Color.rgb(36,92,69));status.setGravity(Gravity.CENTER);bottom.addView(status,new LinearLayout.LayoutParams(-1,45));upload=new Button(this);upload.setText("开始游戏");upload.setOnClickListener(v->{if(game.over)game.reset();else game.start();});bottom.addView(upload,new LinearLayout.LayoutParams(-1,58));root.addView(bottom,new FrameLayout.LayoutParams(-1,140,Gravity.BOTTOM));setContentView(root);
   }
-  @Override public void onBackPressed() { if (webView.canGoBack()) webView.goBack(); else super.onBackPressed(); }
+  void authDialog(){
+    LinearLayout box=new LinearLayout(this);box.setPadding(35,10,35,0);box.setOrientation(LinearLayout.VERTICAL); EditText email=new EditText(this);email.setHint("邮箱");email.setInputType(33);box.addView(email);EditText pass=new EditText(this);pass.setHint("密码（至少12位）");pass.setInputType(129);box.addView(pass); LinearLayout actions=new LinearLayout(this); Button login=new Button(this);login.setText("登录");Button signup=new Button(this);signup.setText("注册");Button magic=new Button(this);magic.setText("魔法链接");actions.addView(login,new LinearLayout.LayoutParams(0,55,1));actions.addView(signup,new LinearLayout.LayoutParams(0,55,1));actions.addView(magic,new LinearLayout.LayoutParams(0,55,1));box.addView(actions); AlertDialog d=new AlertDialog.Builder(this).setTitle("账号认证").setView(box).setNegativeButton("关闭",null).create(); login.setOnClickListener(v->{authRequest("token?grant_type=password",json("email",email.getText().toString(),"password",pass.getText().toString()),d);});signup.setOnClickListener(v->authRequest("signup",json("email",email.getText().toString(),"password",pass.getText().toString()),d));magic.setOnClickListener(v->authRequest("otp",json("email",email.getText().toString(),"create_user",true),d));d.show();
+  }
+  String json(Object... kv){StringBuilder b=new StringBuilder("{");for(int i=0;i<kv.length;i+=2){if(i>0)b.append(',');b.append('"').append(kv[i]).append("\":");if(kv[i+1] instanceof Boolean)b.append(kv[i+1]);else b.append('"').append(String.valueOf(kv[i+1]).replace("\\","\\\\").replace("\"","\\\"" )).append('"');}return b.append('}').toString();}
+  void authRequest(String path,String body,AlertDialog d){io.execute(()->{try{String out=post(SUPABASE+"/auth/v1/"+path,body,ANON,null);JSONObjectLike o=new JSONObjectLike(out);if(o.error!=null)throw new Exception(o.error);accessToken=o.get("access_token");userEmail=o.get("email");runOnUiThread(()->{auth.setText("已登录");status.setText("认证用户：成绩自动进入榜单");d.dismiss();});}catch(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}});}
+  void upload(){if(game.over==false)return;String id=UUID.randomUUID().toString();String payload="{\"id\":\""+id+"\",\"device_id\":\""+UUID.randomUUID()+"\",\"player_name\":\"Android玩家\",\"score\":"+game.points+",\"jumps\":"+game.jumps+",\"perfect\":0,\"combo\":0,\"mode\":\"classic\",\"day\":\""+new java.text.SimpleDateFormat("yyyy-MM-dd").format(new Date())+"\",\"fruit\":\"orange\",\"duration_ms\":"+Math.max(1000,game.jumps*900)+",\"assist\":false}";io.execute(()->{try{String out=post(SUPABASE+"/functions/v1/gzjump-submit",payload,ANON,accessToken);runOnUiThread(()->status.setText("成绩已提交，状态："+(accessToken==null?"待审核":"已认证")));}catch(Exception e){runOnUiThread(()->status.setText("上传失败："+e.getMessage()));}});}
+  String post(String url,String body,String key,String bearer)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL(url).openConnection();c.setRequestMethod("POST");c.setConnectTimeout(10000);c.setReadTimeout(10000);c.setDoOutput(true);c.setRequestProperty("apikey",key);c.setRequestProperty("Authorization","Bearer "+(bearer==null?key:bearer));c.setRequestProperty("Content-Type","application/json");try(OutputStream o=c.getOutputStream()){o.write(body.getBytes(StandardCharsets.UTF_8));}InputStream in=c.getResponseCode()<400?c.getInputStream():c.getErrorStream();String s=new String(in.readAllBytes(),StandardCharsets.UTF_8);if(c.getResponseCode()>=400)throw new Exception(s);return s;}
+  final class GameView extends View {Paint p=new Paint(3);Random r=new Random();float x,y,vy;boolean running,over;int points,jumps;long down;GameView(){super(MainActivity.this);p.setTypeface(Typeface.DEFAULT_BOLD);setFocusable(true);}void reset(){x=160;y=420;vy=0;points=0;jumps=0;over=false;running=false;invalidate();status.setText("按住屏幕蓄力，松手跳跃");upload.setText("开始游戏");}void start(){reset();running=true;upload.setText("游玩中");}protected void onDraw(Canvas c){super.onDraw(c);p.setStyle(Paint.Style.FILL);p.setColor(Color.rgb(195,229,220));c.drawRect(0,0,getWidth(),getHeight(),p);p.setColor(Color.rgb(149,190,151));for(int i=0;i<8;i++){float px=60+i*150;float py=500-(i%3)*55;c.drawOval(px-55,py-18,px+55,py+18,p);}p.setColor(Color.rgb(237,236,167));c.drawCircle(x,y,28,p);p.setColor(Color.rgb(52,88,60));c.drawCircle(x-9,y-4,3,p);c.drawCircle(x+9,y-4,3,p);p.setTextSize(42);c.drawText(String.valueOf(points),getWidth()/2f-20,150,p);if(running){vy+=0.6f;y+=vy;if(y>500){y=500;vy=0;}}invalidate();}public boolean onTouchEvent(android.view.MotionEvent e){if(e.getAction()==0){down=System.currentTimeMillis();if(!running&&!over)start();return true;}if(e.getAction()==1&&running){long held=System.currentTimeMillis()-down;float power=Math.min(18,5+held/80f);vy=-power;jumps++;points++;if(jumps>=30){over=true;running=false;upload.setText("上传成绩");}return true;}return true;}}
+  static final class JSONObjectLike {String raw;String error;JSONObjectLike(String r){raw=r;if(r.contains("error_description"))error=pick("error_description");else if(r.contains("error"))error=pick("error");}String get(String k){return pick(k);}String pick(String k){String q="\""+k+"\"";int i=raw.indexOf(q);if(i<0)return null;i=raw.indexOf(':',i)+1;while(i<raw.length()&&(raw.charAt(i)==' '||raw.charAt(i)=='\"'))i++;int j=i;while(j<raw.length()&&raw.charAt(j)!='\"'&&raw.charAt(j)!=','&&raw.charAt(j)!='}')j++;return raw.substring(i,j);}}
 }
