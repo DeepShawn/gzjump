@@ -1,6 +1,9 @@
 import { validateSubmission } from './validation.js';
 const allowedOrigins = new Set(['https://deepshawn.github.io', 'http://localhost:4173', 'http://127.0.0.1:4173']);
 const rateBuckets = new Map<string, {minute:number; minuteCount:number; day:string; dayCount:number; last:number}>();
+async function databaseJson(url: string, key: string, path: string, init: RequestInit = {}) {
+  return fetch(url + path, { ...init, headers: {apikey:key, Authorization:'Bearer '+key, 'Content-Type':'application/json', ...(init.headers || {})}, signal: AbortSignal.timeout(5000)});
+}
 async function getAuthenticatedUser(req: Request, url: string): Promise<{id:string}|null> {
   const bearer = req.headers.get('authorization') || ''; const apikey = req.headers.get('apikey') || '';
   if (!bearer.startsWith('Bearer ') || bearer.slice(7) === apikey) return null;
@@ -48,10 +51,25 @@ Deno.serve(async (req: Request) => {
     if (rateBuckets.size > 5000) for (const [key, value] of rateBuckets) if (nowMs - value.last > 86400000) rateBuckets.delete(key);
     const identityDigest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-player:' + payload.device_id));
     const playerKey = Array.from(new Uint8Array(identityDigest), b => b.toString(16).padStart(2,'0')).join('');
+    const riskFlags: string[] = [];
+    if (payload.jumps >= 20 && payload.score === payload.jumps * 13) riskFlags.push('perfect_bound_score');
+    if (payload.jumps >= 8 && payload.duration_ms < payload.jumps * 300) riskFlags.push('impossible_duration');
+    if (payload.jumps >= 500) riskFlags.push('bulk_run_pattern');
+    const riskScore = Math.min(100, riskFlags.length * 40);
+    const blocksResponse = await databaseJson(Deno.env.get('SUPABASE_URL')!, serviceKey, '/rest/v1/gzjump_blocks?select=blocked_until,violation_count&subject_key=eq.' + encodeURIComponent(playerKey));
+    const blocks = blocksResponse.ok ? await blocksResponse.json() : [];
+    if (blocks[0]?.blocked_until && new Date(blocks[0].blocked_until).getTime() > Date.now()) return reply(403, {error:'该设备已被暂时封禁，无法提交成绩'});
+    if (riskFlags.length) {
+      await databaseJson(Deno.env.get('SUPABASE_URL')!, serviceKey, '/rest/v1/gzjump_security_events', {method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({subject_key:playerKey,auth_user_id:authenticatedUser?.id || null,flags:riskFlags})});
+      const count = Number(blocks[0]?.violation_count || 0) + 1;
+      await databaseJson(Deno.env.get('SUPABASE_URL')!, serviceKey, '/rest/v1/gzjump_blocks', {method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({subject_key:playerKey,violation_count:count,blocked_until:count >= 3 ? new Date(Date.now()+365*86400000).toISOString() : null,reason:riskFlags.join(',')})});
+      if (count >= 3) return reply(403, {error:'检测到重复高风险提交，该设备已被封禁'});
+    }
+
     const result = await fetch(Deno.env.get('SUPABASE_URL') + '/rest/v1/gzjump_scores', {
       method:'POST',
       headers:{apikey:serviceKey, Authorization:'Bearer '+serviceKey, 'Content-Type':'application/json', Prefer:'return=minimal'},
-      body:JSON.stringify({id:payload.id, player_key:playerKey, auth_user_id:authenticatedUser?.id || null, player_name:payload.player_name, score:payload.score, jumps:payload.jumps, perfect:payload.perfect, combo:payload.combo, mode:payload.mode, day:payload.day, fruit:payload.fruit, duration_ms:payload.duration_ms, assist:false, status:authenticatedUser ? 'approved' : 'pending'}),
+      body:JSON.stringify({id:payload.id, player_key:playerKey, auth_user_id:authenticatedUser?.id || null, player_name:payload.player_name, score:payload.score, jumps:payload.jumps, perfect:payload.perfect, combo:payload.combo, mode:payload.mode, day:payload.day, fruit:payload.fruit, duration_ms:payload.duration_ms, assist:false, status:authenticatedUser && !riskFlags.length ? 'approved' : 'pending', risk_flags:riskFlags, risk_score:riskScore}),
       signal:AbortSignal.timeout(10000)
     });
     if (!result.ok) {
