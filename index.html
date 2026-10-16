@@ -81,7 +81,7 @@
   <div class="setting-row"><div><div class="setting-name">新手瞄准</div><div class="setting-detail">显示预计落点与靶心力度区间，可随时关闭。</div></div><button class="switch" id="setting-assist" role="switch" aria-checked="true" aria-label="新手瞄准辅助"></button></div>
   <div class="setting-row"><div><div class="setting-name">轻触反馈</div><div class="setting-detail">在支持振动的设备上提供落地反馈。</div></div><button class="switch" id="setting-haptic" role="switch" aria-checked="true" aria-label="振动反馈"></button></div>
   <div class="setting-row"><div><div class="setting-name">画面质量</div><div class="setting-detail" id="quality-detail">自适应分辨率，优先保证操作流畅。</div></div><select id="setting-quality" aria-label="画面质量"><option value="auto">自适应</option><option value="low">流畅</option><option value="high">精细</option></select></div>
-  <div class="setting-row"><div><div class="setting-name">帧率显示</div><div class="setting-detail">实时测量，不人为锁定 60 帧。</div></div><button class="switch" id="setting-fps" role="switch" aria-checked="true" aria-label="显示帧率"></button></div>
+  <div class="setting-row"><div><div class="setting-name">帧率显示</div><div class="setting-detail">实时测量，不人为锁定 60 帧。</div></div><button class="switch" id="setting-fps" role="switch" aria-checked="true" aria-label="显示帧率"></button></div><div class="setting-row"><div><div class="setting-name">自动更新最佳成绩</div><div class="setting-detail">每局结束后自动保存更高的本地最佳成绩，默认开启。</div></div><button class="switch" id="setting-autoBest" role="switch" aria-checked="true" aria-label="自动更新最佳成绩"></button></div>
   <button class="secondary-button" id="fullscreen-button" style="width:100%;margin-top:20px">进入全屏</button><div class="setting-foot">偏好会保存在当前浏览器。切换标签页或打开菜单会自动暂停，蓄力则安全取消。</div>
  </div>
 </section>
@@ -118,14 +118,14 @@ const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)), lerp=(a,b,t)=>a+(b-a)*t;
 const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const STORAGE='fruit_hop_v1';
 const FRUITS=[{id:'orange',name:'橘子',color:'#f7a34d'},{id:'lime',name:'青柠',color:'#98bd59'},{id:'peach',name:'蜜桃',color:'#efa0a0'},{id:'lemon',name:'柠檬',color:'#e1c04c'},{id:'blueberry',name:'蓝莓',color:'#8b94d0'},{id:'melon',name:'西瓜',color:'#6eb082'}];
-const DEFAULTS={sound:true,volume:55,assist:true,haptic:true,quality:'auto',fps:true,fruit:'orange'};
+const DEFAULTS={sound:true,volume:55,assist:true,haptic:true,quality:'auto',fps:true,autoBest:true,fruit:'orange'};
 let saved={settings:{...DEFAULTS},best:0,daily:{},runs:0,records:[]},canStore=true;
 try{const raw=localStorage.getItem(STORAGE);if(raw){const o=JSON.parse(raw);if(o&&typeof o==='object'){saved.settings={...DEFAULTS,...(o.settings||{})};saved.best=Number.isFinite(o.best)?Math.max(0,o.best):0;saved.runs=Number.isFinite(o.runs)?Math.max(0,o.runs):0;saved.daily=o.daily&&typeof o.daily==='object'&&!Array.isArray(o.daily)?o.daily:{};saved.records=Array.isArray(o.records)?o.records.filter(r=>r&&Number.isFinite(r.score)&&typeof r.date==='string').slice(0,80):[];}}}catch(_){canStore=false;}
 const settings=saved.settings;
 if(!FRUITS.some(f=>f.id===settings.fruit))settings.fruit='orange';
 if(!['auto','low','high'].includes(settings.quality))settings.quality='auto';
 settings.volume=clamp(Number(settings.volume)||0,0,100);
-for(const key of ['sound','assist','haptic','fps'])settings[key]=!!settings[key];
+for(const key of ['sound','assist','haptic','fps','autoBest'])settings[key]=!!settings[key];
 function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(saved));}catch(_){canStore=false;}}
 function dateKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function dailyInfo(key=dateKey()){return saved.daily[key]||{best:0,runs:0};}
@@ -200,7 +200,7 @@ function drawFruitIcon(canvas,id,wet=false){const g=canvas.getContext('2d');g.cl
 function buildPicker(){const row=$('fruit-row');for(const f of FRUITS){const b=document.createElement('button');b.className='fruit-option';b.title=f.name;b.setAttribute('aria-label',`选择${f.name}`);b.dataset.fruit=f.id;const c=document.createElement('canvas');c.width=90;c.height=98;b.append(c);drawFruitIcon(c,f.id);b.addEventListener('click',()=>{settings.fruit=f.id;persist();updateSettings();sound('click');});row.append(b);}}
 function updateSettings(){
  $('sound-button').innerHTML=settings.sound?ICON_SOUND:ICON_MUTE;$('sound-button').setAttribute('aria-label',settings.sound?'关闭音效':'开启音效');
- for(const id of ['sound','assist','haptic','fps'])$('setting-'+id).setAttribute('aria-checked',String(settings[id]));
+ for(const id of ['sound','assist','haptic','fps','autoBest'])$('setting-'+id).setAttribute('aria-checked',String(settings[id]));
  $('setting-volume').value=settings.volume;$('setting-quality').value=settings.quality;$('fps').hidden=!settings.fps;
  document.querySelectorAll('.fruit-option').forEach(b=>{const selected=b.dataset.fruit===settings.fruit;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
  setText($('quality-detail'),settings.quality==='auto'?'自适应分辨率，优先保证操作流畅。':settings.quality==='low'?'减少水面细节与粒子，降低渲染分辨率。':'更清晰的边缘与完整水花，功耗可能更高。');
@@ -318,7 +318,7 @@ function land(){
    else if(skipped>0)addLabel(player.x,player.z,'一跃跨岛！',`+${points}${perfect?' · 靶心命中':''}`,'#47693c');
    else if(perfect)addLabel(player.x,player.z,combo>1?`靶心连击 ×${combo}`:'正中靶心！',`+${points}`,'#47693c');
    else addLabel(player.x,player.z,'+'+points,'稳稳落地','#456953');
-   if(mode==='classic'&&score>saved.best){saved.best=score;persist();}else if(mode==='daily'){const di=dailyInfo(runDate);if(score>di.best){saved.daily[runDate]={best:score,runs:di.runs};persist();}}
+   if(mode==='classic'&&settings.autoBest&&score>saved.best){saved.best=score;persist();}else if(mode==='daily'&&settings.autoBest){const di=dailyInfo(runDate);if(score>di.best){saved.daily[runDate]={best:score,runs:di.runs};persist();}}
    while(platforms[platforms.length-1].index<current+5)addPlatform();platforms=platforms.filter(p=>p.index>=current-2);
    updateHUD();scoreEl.classList.remove('bump');void scoreEl.offsetWidth;scoreEl.classList.add('bump');updateChargeTarget();setHold(jumps<3?'继续按住 · 向下一块小岛出发':'按住蓄力 · 松手跳跃');live(`${perfect?'靶心命中，':''}得分 ${score}，成功跳跃 ${jumps} 次。`);
   }else if(p.index===current){combo=0;updateHUD();sound('land');addLabel(player.x,player.z,'还在这座岛','再蓄力一点','#667b5a');updateChargeTarget();setHold('这次再多按一会儿');}
@@ -520,7 +520,7 @@ $('settings-button').addEventListener('click',()=>openModal('settings'));$('paus
 $('help-button').addEventListener('click',()=>openModal('help'));$('pause-help').addEventListener('click',()=>openModal('help'));
 $('records-button').addEventListener('click',()=>openModal('records'));$('over-records').addEventListener('click',()=>openModal('records'));
 for(const b of document.querySelectorAll('[data-close]'))b.addEventListener('click',closeModal);
-for(const key of ['assist','haptic','fps'])$('setting-'+key).addEventListener('click',()=>{settings[key]=!settings[key];persist();updateSettings();if(key==='haptic'&&settings.haptic)vibrate(12);});
+for(const key of ['assist','haptic','fps','autoBest'])$('setting-'+key).addEventListener('click',()=>{settings[key]=!settings[key];persist();updateSettings();if(key==='haptic'&&settings.haptic)vibrate(12);});
 $('setting-volume').addEventListener('input',e=>{settings.volume=Number(e.target.value);persist();updateSettings();});
 $('setting-quality').addEventListener('change',e=>{settings.quality=e.target.value;autoRatio=2;slowSeconds=0;persist();resize();updateSettings();});
 $('classic-tab').addEventListener('click',()=>{recordTab='classic';renderRecords();});$('daily-tab').addEventListener('click',()=>{recordTab='daily';renderRecords();});
