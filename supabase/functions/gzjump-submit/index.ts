@@ -52,7 +52,10 @@ Deno.serve(async (req: Request) => {
     const identityDigest = await crypto.subtle.sign('HMAC', hmac, new TextEncoder().encode('gzjump-player:' + payload.device_id));
     const playerKey = Array.from(new Uint8Array(identityDigest), b => b.toString(16).padStart(2,'0')).join('');
     const riskFlags: string[] = [];
-    if (payload.jumps >= 20 && payload.score === payload.jumps * 13) riskFlags.push('perfect_bound_score');
+    // The client now awards double points for cross-island landings. The old
+    // 13-points-per-jump flag would mark legitimate scores as suspicious, so
+    // only flag a run that sits at the new absolute ceiling repeatedly.
+    if (payload.jumps >= 20 && payload.score === payload.jumps * 23) riskFlags.push('perfect_bound_score');
     if (payload.jumps >= 8 && payload.duration_ms < payload.jumps * 300) riskFlags.push('impossible_duration');
     if (payload.jumps >= 500) riskFlags.push('bulk_run_pattern');
     const riskScore = Math.min(100, riskFlags.length * 40);
@@ -78,6 +81,7 @@ Deno.serve(async (req: Request) => {
       console.error('gzjump database submission failed', result.status, detail.slice(0, 200));
       return reply(503, {error:'成绩暂未保存，请稍后重试'});
     }
-    return reply(200, {id:payload.id, status:'pending'});
+    const submissionStatus = authenticatedUser && !riskFlags.length ? 'approved' : 'pending';
+    return reply(200, {id:payload.id, status:submissionStatus});
   } catch (_) {return reply(503, {error:'服务暂不可用，请稍后重试'});}
 });

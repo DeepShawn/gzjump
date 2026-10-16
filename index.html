@@ -103,7 +103,7 @@ body.beta-ui .primary-button:hover{background:linear-gradient(135deg,#1b5c49,#27
 <section class="overlay" id="help-screen" hidden>
  <div class="panel wide" role="dialog" aria-modal="true" aria-labelledby="help-title">
   <div class="panel-header"><div><div class="eyebrow">SMALL HOPS, BIG JOY</div><h2 id="help-title">三步，学会过海。</h2></div><button class="close-button" data-close aria-label="关闭玩法"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6L18 18M18 6L6 18"/></svg></button></div>
-  <div class="help-steps"><div class="help-step"><div class="step-number">01</div><div><h3>按住，给果子一点勇气</h3><p>在游戏画面按住鼠标、手指或空格键。按得越久，跳得越远；蓄满后力度不再增加。</p></div></div><div class="help-step"><div class="step-number">02</div><div><h3>松开，奔向下一块小岛</h3><p>方向会自动对准下一块平台，只需控制距离。黄色力度区间与虚线落点能帮你瞄准。</p></div></div><div class="help-step"><div class="step-number">03</div><div><h3>踩中靶心，好事加倍</h3><p>普通落地 +1；正中靶心 +2，连续命中依次 +4、+6、+8，最高每跳 +10。金色果汁岛额外 +3。</p></div></div></div>
+  <div class="help-steps"><div class="help-step"><div class="step-number">01</div><div><h3>按住，给果子一点勇气</h3><p>在游戏画面按住鼠标、手指或空格键。按得越久，跳得越远；蓄满后力度不再增加。</p></div></div><div class="help-step"><div class="step-number">02</div><div><h3>松开，奔向下一块小岛</h3><p>方向会自动对准下一块平台，只需控制距离。黄色力度区间与虚线落点能帮你瞄准。</p></div></div><div class="help-step"><div class="step-number">03</div><div><h3>踩中靶心，好事加倍</h3><p>普通落地 +1；正中靶心 +2，连续命中依次 +4、+6、+8，最高每跳 +10。跨过至少一块平台落地，本次基础分双倍；金色果汁岛额外 +3。</p></div></div></div>
   <div class="rule-box">落在原地可以继续蓄力，但不会加分。前 300 分保持轻松节奏，之后平台间距会逐步拉开、面积逐步变小。落水就会「果子潮了」。每日挑战使用本地日期的固定航线；经典模式每次都是新旅程。所有水果免费使用，手感一致。</div><div class="key-row"><span><kbd>Space</kbd>蓄力</span><span><kbd>Esc / P</kbd>暂停</span><span><kbd>R</kbd>重开</span><span><kbd>M</kbd>音效</span></div><button class="primary-button" data-close style="width:100%;margin-top:24px">懂了，准备起跳</button>
  </div>
 </section>
@@ -333,9 +333,14 @@ function land(){
    const skipped=p.index-current-1;
    const perfect=Math.hypot(player.x-p.x,player.z-p.z)<=perfectRadius(p);jumps++;current=p.index;
    let points=1;if(perfect){combo++;perfectCount++;maxCombo=Math.max(maxCombo,combo);points=Math.min(combo*2,10);sound('perfect',combo);vibrate(combo>1?[12,25,12]:12);burst(player.x,player.z,1,combo>2?18:11);}else{combo=0;sound('land');vibrate(7);burst(player.x,player.z,0,5);}
+   // Landing beyond the next island is a cross-island jump. It is harder
+   // than a normal landing, so the jump points are doubled once (the bonus
+   // island's fixed +3 reward stays separate and is not doubled).
+   const crossIsland=skipped>0;
+   if(crossIsland)points*=2;
    const bonus=p.kind==='bonus'?3:0;score+=points+bonus;
-   if(bonus){sound('bonus');addLabel(player.x,player.z,`果汁补给 +${points+bonus}`,perfect?'靶心命中 · 额外 +3':'额外奖励 +3','#8a783a');}
-   else if(skipped>0)addLabel(player.x,player.z,'一跃跨岛！',`+${points}${perfect?' · 靶心命中':''}`,'#47693c');
+   if(bonus){sound('bonus');addLabel(player.x,player.z,`果汁补给 +${points+bonus}`,`${crossIsland?'跨岛 · 双倍积分 · ':''}${perfect?'靶心命中 · 额外 +3':'额外奖励 +3'}`,'#8a783a');}
+   else if(crossIsland)addLabel(player.x,player.z,'一跃跨岛！',`+${points}${perfect?' · 靶心命中 · 双倍积分':' · 双倍积分'}`,'#47693c');
    else if(perfect)addLabel(player.x,player.z,combo>1?`靶心连击 ×${combo}`:'正中靶心！',`+${points}`,'#47693c');
    else addLabel(player.x,player.z,'+'+points,'稳稳落地','#456953');
    if(mode==='classic'&&settings.autoBest&&score>saved.best){saved.best=score;persist();}else if(mode==='daily'&&settings.autoBest){const di=dailyInfo(runDate);if(score>di.best){saved.daily[runDate]={best:score,runs:di.runs};persist();}}
@@ -375,9 +380,13 @@ function worldX(x,z){return anchorX+((x-camX)-(z-camZ))*IX*S+shakeX;}
 function worldY(x,z,h=0){return anchorY+((x-camX)+(z-camZ))*IZ*S-h*S+shakeY;}
 function drawBetaAtmosphere(t){
  if(!settings.betaUI||settings.quality==='low')return;
- ctx.save();ctx.globalAlpha=.11;ctx.lineWidth=1;
- for(let i=0;i<6;i++){const x=((i+1)*W/7+Math.sin(t*.24+i*1.7)*36)%(W+100)-50;const y=H*(.23+i*.095)+Math.sin(t*.8+i)*12;ctx.strokeStyle=i%2?'#f6ffe0':'#7fc5ad';ctx.beginPath();ctx.arc(x,y,10+((t*16+i*19)%34),0,TAU);ctx.stroke();}
- ctx.globalAlpha=.06;ctx.strokeStyle='#f7ffe9';for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(W*(.1+i*.38),H);ctx.quadraticCurveTo(W*(.22+i*.38)+Math.sin(t*.35+i)*18,H*.42,W*(.31+i*.35),0);ctx.stroke();}
+ ctx.save();
+ const glow=ctx.createRadialGradient(W*.53,H*.45,0,W*.53,H*.45,Math.max(W,H)*.7);glow.addColorStop(0,'rgba(255,255,231,.14)');glow.addColorStop(.42,'rgba(173,231,204,.05)');glow.addColorStop(1,'rgba(85,160,146,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+ ctx.globalAlpha=.13;ctx.lineWidth=1;
+ for(let i=0;i<8;i++){const x=((i+1)*W/9+Math.sin(t*.24+i*1.7)*36)%(W+100)-50;const y=H*(.18+i*.085)+Math.sin(t*.8+i)*12;ctx.strokeStyle=i%2?'#f6ffe0':'#7fc5ad';ctx.beginPath();ctx.arc(x,y,10+((t*16+i*19)%34),0,TAU);ctx.stroke();}
+ ctx.globalAlpha=.08;ctx.strokeStyle='#f7ffe9';for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(W*(.06+i*.31),H);ctx.quadraticCurveTo(W*(.18+i*.31)+Math.sin(t*.35+i)*18,H*.42,W*(.28+i*.30),0);ctx.stroke();}
+ ctx.globalAlpha=.10;ctx.strokeStyle='#f4ffdc';ctx.lineWidth=1.5;
+ for(let i=0;i<3;i++){const y=H*(.56+i*.13)+Math.sin(t*.55+i)*8;ctx.beginPath();ctx.moveTo(-40,y);ctx.bezierCurveTo(W*.25,y-8+Math.sin(t+i)*4,W*.62,y+9,W+40,y-3);ctx.stroke();}
  ctx.restore();
 }
 function drawWater(t){
@@ -420,22 +429,36 @@ function bakePlatform(p){
  if(p.index>0){g.fillStyle='rgba(79,104,78,.3)';g.font='8px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';g.textAlign='center';g.fillText(String(p.index).padStart(2,'0'),0,p.half-12);}
  g.restore();p.art={canvas:c,left,top,width:c.width/ratio,height:c.height/ratio};p.artVersion=artVersion;
 }
+function easeOutCubic(t){t=clamp(t,0,1);return 1-Math.pow(1-t,3);}
+function easeInCubic(t){return Math.pow(clamp(t,0,1),3);}
+function easeOutBack(t){t=clamp(t,0,1);const c1=1.70158,c3=c1+1,u=t-1;return 1+c3*u*u*u+c1*u*u;}
+function platformAnimation(p){
+ const enter=clamp(p.age/.9,0,1),sink=clamp(p.sink,0,1);
+ return {enter,sink,enterEase:easeOutBack(enter),enterFade:easeOutCubic(enter),sinkEase:easeInCubic(sink)};
+}
 function platformMotion(p,t){
  if(reduced)return 0;
- const enter=22*Math.pow(1-clamp(p.age/.62,0,1),2);
- const exit=18*clamp(p.sink,0,1);
- const amplitude=settings.betaUI&&settings.quality!=='low'?4.8:2.2;
- const bob=Math.sin(t*(.92+Math.min(p.index,24)*.012)+p.phase)*amplitude;
- return enter+exit-bob;
+ const a=platformAnimation(p);
+ const enter=(1-a.enterEase)*38;
+ const exit=a.sinkEase*30;
+ const amplitude=settings.betaUI&&settings.quality!=='low'?6.8:3.2;
+ const bob=Math.sin(t*(.82+Math.min(p.index,24)*.014)+p.phase)*amplitude;
+ const secondary=Math.sin(t*1.7+p.phase*1.31)*amplitude*.18;
+ return enter+exit-bob-secondary;
 }
 function platformScreenY(p,t,h=TOP){return worldY(p.x,p.z,h)+platformMotion(p,t)*S;}
 function drawPlatform(p,t){
  const x=worldX(p.x,p.z),y=platformScreenY(p,t);if(x<-210*S||x>W+210*S||y<-160*S||y>H+150*S)return;
  if(!p.art||p.artVersion!==artVersion)bakePlatform(p);
- ctx.save();ctx.translate(x,y);ctx.scale(S,S);ctx.globalAlpha=p.index<current-1?.58:1;
+ const anim=platformAnimation(p),baseAlpha=p.index<current-1?.58:1;
+ const alpha=baseAlpha*anim.enterFade*(1-anim.sinkEase*.92);
+ if(alpha<.015)return;
+ const scale=(.93+.07*anim.enterFade)*(1-anim.sinkEase*.035);
+ ctx.save();ctx.translate(x,y);ctx.scale(S*scale,S*scale);ctx.globalAlpha=alpha;
  const a=p.art;ctx.drawImage(a.canvas,a.left,a.top,a.width,a.height);
  if(settings.quality!=='low'){ctx.strokeStyle='rgba(241,255,228,.36)';ctx.lineWidth=1.1;ctx.beginPath();ctx.ellipse(0,TOP+4,p.half*1.4+Math.sin(t*1.3+p.index)*2,p.half*.53,0,.15,Math.PI-.15);ctx.stroke();}
  if(settings.betaUI&&settings.quality!=='low'&&p.index>=current-1){const pulse=.5+.5*Math.sin(t*2.2+p.phase);ctx.save();ctx.globalAlpha=.10+.06*pulse;ctx.strokeStyle='#eaffc8';ctx.lineWidth=1.8;ctx.beginPath();ctx.ellipse(0,TOP+3,p.half*1.5+pulse*3,p.half*.58+pulse*1.5,0,.12,Math.PI-.12);ctx.stroke();ctx.restore();}
+ if(settings.betaUI&&settings.quality!=='low'&&p.index===current+1){const shimmer=(t*.72+p.phase)%TAU;ctx.save();ctx.globalAlpha=.18;ctx.strokeStyle='#fffbd8';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(Math.cos(shimmer)*p.half*.72,TOP+2+Math.sin(shimmer)*p.half*.2);ctx.lineTo(Math.cos(shimmer)*p.half*.92,TOP+2+Math.sin(shimmer)*p.half*.26);ctx.stroke();ctx.restore();}
  if(p.index===current+1&&(settings.assist||!active)){
   ctx.save();ctx.transform(IX,IZ,-IX,IZ,0,0);ctx.strokeStyle=`rgba(115,148,78,${.30+Math.sin(t*3)*.08})`;ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.arc(0,0,27,0,TAU);ctx.stroke();ctx.setLineDash([]);if(p.kind!=='bonus')ellipse(ctx,0,0,11,11,'#cad8a535');ctx.restore();
  }
