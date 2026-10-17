@@ -152,7 +152,7 @@ const scoreEl=$('score'),fillEl=$('charge-fill'),tickEl=$('charge-tick'),targetE
 let screen='home',screenReturn='home',mode='classic',gameState='ready',active=false;
 let W=0,H=0,S=1,DPR=1,bgGradient=null,autoRatio=2,artVersion=0,renderDirty=true;
 let camX=0,camZ=0,anchorX=0,anchorY=0,worldTime=0,lastFrame=0,elapsedForFPS=0,framesForFPS=0,fps=60,frameAverage=16.67,slowSeconds=0,qualityCooldown=0;
-let rng=seeded(42),platforms=[],current=0,score=0,combo=0,maxCombo=0,jumps=0,perfectCount=0,runDate=dateKey(),runBestBefore=0,recorded=false;
+let rng=seeded(42),platforms=[],current=0,score=0,combo=0,maxCombo=0,jumps=0,perfectCount=0,runDate=dateKey(),runBestBefore=0,recorded=false,assistUsed=false;
 let player={x:0,z:0,h:TOP,rot:0},charge=0,chargeStartedAt=0,jump=null,fallTime=0,overDelay=0,landBounce=0,trailTimer=0;
 let pointerID=null,keyHeld=false,toastTimer=0,recordTab='classic',shake=0,shakeX=0,shakeY=0,homeBias=1,lastHoldText='';
 const cameraTarget={x:0,z:0};
@@ -265,7 +265,7 @@ function addPlatform(){
 function startRun(newMode='classic',preview=false){
  stopHum();cancelInput();mode=newMode;runDate=dateKey();runID=globalThis.crypto?.randomUUID?.()||null;runStartedAt=performance.now();window.dispatchEvent(new CustomEvent('fruit-hop:start'));rng=seeded(preview?90731:mode==='daily'?hash('fruit-hop-v1:'+runDate):randomSeed());
  platforms=[buildPlatform(0,0,0,61,'square','normal',palette[0])];lastDirection=0;sameDirection=0;for(let i=0;i<5;i++)addPlatform();
- current=0;score=0;combo=0;maxCombo=0;jumps=0;perfectCount=0;charge=0;jump=null;landBounce=0;fallTime=0;overDelay=0;shake=0;recorded=false;
+ current=0;score=0;combo=0;maxCombo=0;jumps=0;perfectCount=0;charge=0;jump=null;landBounce=0;fallTime=0;overDelay=0;shake=0;recorded=false;assistUsed=!preview&&settings.assist;
  player={x:0,z:0,h:TOP,rot:0};runBestBefore=mode==='daily'?dailyInfo(runDate).best:saved.best;
  for(const p of particles)p.life=0;for(const r of ripples)r.life=0;for(const l of labels)l.life=0;
  camX=platforms[1].x*.18;camZ=platforms[1].z*.18;
@@ -354,7 +354,7 @@ function splash(){gameState='dead';stopHum();cancelInput();player.h=-10;overDela
 function recordRun(abandoned=false){
  if(recorded)return;recorded=true;
  const r={score,jumps,perfect:perfectCount,combo:maxCombo,mode,date:new Date().toISOString(),day:runDate,fruit:settings.fruit,abandoned};
- if(!abandoned&&runID)window.dispatchEvent(new CustomEvent('fruit-hop:complete',{detail:{id:runID,score,jumps,perfect:perfectCount,combo:maxCombo,mode,day:runDate,fruit:settings.fruit,duration_ms:Math.round(performance.now()-runStartedAt),assist:settings.assist}}));
+ if(!abandoned&&runID)window.dispatchEvent(new CustomEvent('fruit-hop:complete',{detail:{id:runID,score,jumps,perfect:perfectCount,combo:maxCombo,mode,day:runDate,fruit:settings.fruit,duration_ms:Math.round(performance.now()-runStartedAt),assist:assistUsed}}));
  saved.records.push(r);saved.records=saved.records.sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date));
  // Keep the 30 best classic and 30 best daily runs plus 20 most recent.
  const keep=new Set([...saved.records.filter(r=>r.mode==='classic').slice(0,30),...saved.records.filter(r=>r.mode==='daily').slice(0,30),...saved.records.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20)]);saved.records=saved.records.filter(r=>keep.has(r));
@@ -581,7 +581,7 @@ $('settings-button').addEventListener('click',()=>openModal('settings'));$('paus
 $('help-button').addEventListener('click',()=>openModal('help'));$('pause-help').addEventListener('click',()=>openModal('help'));
 $('records-button').addEventListener('click',()=>openModal('records'));$('over-records').addEventListener('click',()=>openModal('records'));
 for(const b of document.querySelectorAll('[data-close]'))b.addEventListener('click',closeModal);
-for(const key of ['assist','haptic','fps','autoBest','betaUI'])$('setting-'+key).addEventListener('click',()=>{settings[key]=!settings[key];persist();updateSettings();if(key==='haptic'&&settings.haptic)vibrate(12);});
+for(const key of ['assist','haptic','fps','autoBest','betaUI'])$('setting-'+key).addEventListener('click',()=>{settings[key]=!settings[key];if(key==='assist'&&settings.assist&&active){assistUsed=true;toast('本局已开启新手瞄准，成绩将不能上传。');}persist();updateSettings();if(key==='haptic'&&settings.haptic)vibrate(12);});
 $('setting-volume').addEventListener('input',e=>{settings.volume=Number(e.target.value);persist();updateSettings();});
 $('setting-quality').addEventListener('change',e=>{settings.quality=e.target.value;autoRatio=2;slowSeconds=0;persist();resize();updateSettings();});
 $('classic-tab').addEventListener('click',()=>{recordTab='classic';renderRecords();});$('daily-tab').addEventListener('click',()=>{recordTab='daily';renderRecords();});
@@ -593,7 +593,7 @@ document.addEventListener('touchmove',e=>{if(!e.target.closest('.panel'))e.preve
 buildPicker();resize();startRun('classic',true);updateSettings();requestAnimationFrame(frame);
 // Read-only diagnostics are exposed only with #debug. Normal runs contain no test UI.
 if(location.hash==='#debug')Object.defineProperty(window,'FruitHopDebug',{value:Object.freeze({
- state:()=>({screen,mode,gameState,score,jumps,combo,maxCombo,perfectCount,current,charge,betaUI:settings.betaUI,difficulty:difficultyLevel(),player:{...player},next:nextPlatform()?{x:nextPlatform().x,z:nextPlatform().z,half:nextPlatform().half,index:nextPlatform().index,shape:nextPlatform().shape}:null,platforms:platforms.map(p=>({x:p.x,z:p.z,index:p.index,half:p.half,kind:p.kind})),idealHold:distanceCharge(aim().distance)*MAX_CHARGE,fps,ratio:DPR,particles:particles.filter(p=>p.life>0).length,records:saved.records.length,canStore}),
+ state:()=>({screen,mode,gameState,score,jumps,combo,maxCombo,perfectCount,current,charge,assistUsed,betaUI:settings.betaUI,difficulty:difficultyLevel(),player:{...player},next:nextPlatform()?{x:nextPlatform().x,z:nextPlatform().z,half:nextPlatform().half,index:nextPlatform().index,shape:nextPlatform().shape}:null,platforms:platforms.map(p=>({x:p.x,z:p.z,index:p.index,half:p.half,kind:p.kind})),idealHold:distanceCharge(aim().distance)*MAX_CHARGE,fps,ratio:DPR,particles:particles.filter(p=>p.life>0).length,records:saved.records.length,canStore}),
  })});
 })();
 </script>
