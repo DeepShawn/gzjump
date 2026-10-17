@@ -5,6 +5,7 @@
 ## 在线地址
 
 - 游戏：https://deepshawn.github.io/gzjump/
+- 新玩法「果子搭路」：https://deepshawn.github.io/gzjump/bridge.html
 - 管理员：https://deepshawn.github.io/gzjump/admin.html
 - Android WebView APK：[下载](https://raw.githubusercontent.com/DeepShawn/gzjump/main/android/gzjump-webview-release.apk)
 
@@ -18,6 +19,7 @@
 - 同一用户使用不可逆身份哈希归并历史成绩，不保存原始 IP。
 - 连续三次高风险提交自动封禁；管理员可以查看风险标记并手动封禁设备。
 - `admin.html` 提供登录、审核、拒绝、删除和风险查看。
+- 「果子搭路」为同系列 2D 搭路玩法：长按伸长木板，松手落桥，果子自动走过当前坑，并提前显示下一块和下下块路面。
 - 前 300 分保持稳定节奏，之后平台距离和尺寸逐步增加难度；平台支持升起、下沉和动态水面效果。
 - 设置中的 Beta 版 UI 默认关闭，开启后提供更精细的水面光效、平台动画和界面动效，会增加耗能。
 
