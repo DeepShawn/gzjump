@@ -45,6 +45,7 @@ body.beta-ui .primary-button:hover{background:linear-gradient(135deg,#1b5c49,#27
 @keyframes beta-pulse{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.035)}}
 .bridge-entry{width:min(382px,100%);margin-top:14px;display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid rgba(58,111,83,.14);border-radius:16px;background:rgba(252,255,244,.48);text-align:left;box-shadow:0 7px 20px rgba(37,91,69,.06);transition:transform .2s,background .2s,box-shadow .2s}.bridge-entry:hover{transform:translateY(-2px);background:rgba(255,255,248,.82);box-shadow:0 11px 26px rgba(37,91,69,.12)}.bridge-entry-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:11px;background:#e6eec9;color:#4e7957;font-size:18px}.bridge-entry b{display:block;font-size:12px;color:#315e4a}.bridge-entry small{display:block;margin-top:3px;font-size:10px;color:#79917e}.bridge-entry-arrow{margin-left:auto;font-size:20px;color:#679073}
 .hell-entry{width:min(382px,100%);margin-top:8px;display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid #9c56422b;border-radius:16px;background:linear-gradient(100deg,#fff1df8a,#f4dfc55c);text-align:left;box-shadow:0 7px 20px #9550390b;transition:transform .2s,background .2s,box-shadow .2s}.hell-entry:hover{transform:translateY(-2px);background:#fff2dfdd;box-shadow:0 11px 26px #95503918}.hell-entry-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:11px;background:#f1d5bb;color:#a7583d;font-size:17px}.hell-entry b{display:block;font-size:12px;color:#864933}.hell-entry small{display:block;margin-top:3px;font-size:10px;color:#9b7566}.hell-entry-arrow{margin-left:auto;font-size:20px;color:#a76653}
+.myth-entry{width:min(382px,100%);margin-top:8px;display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid #795c9b3a;border-radius:16px;background:linear-gradient(100deg,#f4e9ffb8,#fff2d77a);text-align:left;box-shadow:0 8px 22px #72509514;transition:transform .2s,background .2s,box-shadow .2s}.myth-entry:hover{transform:translateY(-2px);background:linear-gradient(100deg,#f7edffd9,#fff7dfc9);box-shadow:0 12px 30px #72509525}.myth-entry-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:11px;background:#e3d2f2;color:#704995;font-size:19px}.myth-entry b{display:block;font-size:12px;color:#67428a}.myth-entry small{display:block;margin-top:3px;font-size:10px;color:#8b719c}.myth-entry-arrow{margin-left:auto;font-size:20px;color:#805aa1}
 </style>
 </head>
 <body>
@@ -74,6 +75,7 @@ body.beta-ui .primary-button:hover{background:linear-gradient(135deg,#1b5c49,#27
     <div class="start-actions"><button class="primary-button" id="start-button">开始跳跃<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12H20M14 6L20 12L14 18"/></svg></button><button class="secondary-button daily-button" id="daily-button">每日挑战<span id="daily-date">每日同一片海</span></button></div>
     <button class="bridge-entry" id="bridge-button"><span class="bridge-entry-icon">↗</span><span><b>果子搭路</b><small>长按伸长木板，松手搭过深坑</small></span><span class="bridge-entry-arrow">→</span></button>
     <button class="hell-entry" id="hell-button"><span class="hell-entry-icon">✦</span><span><b>地狱模式</b><small>跳一跳与搭路 · 难度 ×20–100</small></span><span class="hell-entry-arrow">→</span></button>
+    <button class="myth-entry" id="myth-button"><span class="myth-entry-icon">♢</span><span><b>神话模式</b><small>超远航线 · 难度 ×200–1000</small></span><span class="myth-entry-arrow">→</span></button>
     <div class="fruit-picker"><div class="section-caption">今天，哪颗出发？</div><div class="fruit-row" id="fruit-row" role="group" aria-label="选择水果角色"></div></div>
     <div class="home-meta"><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 8L6 11L13 4"/></svg>即开即玩</span><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="2" width="10" height="12" rx="2"/><path d="M6 11H10"/></svg>触屏友好</span><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 3H11L13 5V13H3V3Z"/><path d="M5 3V7H10V3M5 13V9H11V13"/></svg>纪录自动保存</span></div>
   </div>
@@ -114,7 +116,7 @@ body.beta-ui .primary-button:hover{background:linear-gradient(135deg,#1b5c49,#27
 <section class="overlay" id="records-screen" hidden>
  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="records-title">
   <div class="panel-header"><div><div class="eyebrow">YOUR LITTLE MILESTONES</div><h2 id="records-title">每一步，都算数。</h2></div><button class="close-button" data-close aria-label="关闭纪录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6L18 18M18 6L6 18"/></svg></button></div>
-  <div class="record-tabs" role="tablist" aria-label="纪录类型"><button class="record-tab active" id="classic-tab" role="tab" aria-selected="true">经典航线</button><button class="record-tab" id="daily-tab" role="tab" aria-selected="false">今日挑战</button></div><div class="record-summary"><div><b id="records-best">0</b><span>最佳得分</span></div><div><b id="records-runs">0</b><span>完成局数</span></div></div><div class="leaderboard-head"><span>名次</span><span>出发时间 / 水果</span><span style="text-align:right">得分</span></div><div id="leaderboard"></div><div class="record-notice">仅记录此浏览器的成绩，不是在线排名。<br>清除网站数据或更换浏览器后，纪录可能丢失。</div><div class="cloud-title"><h3>云端榜单</h3><button class="text-button" id="refresh-cloud">刷新</button></div><p id="cloud-status" role="status" aria-live="polite"></p><div id="cloud-leaderboard"></div>
+  <div class="record-tabs" role="tablist" aria-label="纪录类型"><button class="record-tab active" id="classic-tab" role="tab" aria-selected="true">经典航线</button><button class="record-tab" id="daily-tab" role="tab" aria-selected="false">今日挑战</button><button class="record-tab" id="myth-tab" role="tab" aria-selected="false">神话模式</button></div><div class="record-summary"><div><b id="records-best">0</b><span>最佳得分</span></div><div><b id="records-runs">0</b><span>完成局数</span></div></div><div class="leaderboard-head"><span>名次</span><span>出发时间 / 水果</span><span style="text-align:right">得分</span></div><div id="leaderboard"></div><div class="record-notice">仅记录此浏览器的成绩，不是在线排名。<br>清除网站数据或更换浏览器后，纪录可能丢失。</div><div class="cloud-title"><h3>云端榜单</h3><button class="text-button" id="refresh-cloud">刷新</button></div><p id="cloud-status" role="status" aria-live="polite"></p><div id="cloud-leaderboard"></div>
  </div>
 </section>
 <section id="control-hud" hidden>
@@ -132,16 +134,18 @@ body.beta-ui .primary-button:hover{background:linear-gradient(135deg,#1b5c49,#27
 const $ = id => document.getElementById(id);
 const canvas = $('sea'), ctx = canvas.getContext('2d', {alpha:false, desynchronized:true});
 if (!ctx) { const note=document.createElement('div'); note.className='no-canvas'; note.textContent='浏览器暂不支持 Canvas 2D。请使用支持 HTML5 的浏览器打开此文件。';document.body.append(note);return; }
-const TAU=Math.PI*2, IX=.86, IZ=.44, TOP=46, MAX_CHARGE=1.22, MIN_DIST=12, MAX_DIST=560;
+const TAU=Math.PI*2, IX=.86, IZ=.44, TOP=46, MAX_CHARGE=1.22, MIN_DIST=12, MAX_DIST=560, MYTH_MAX_DIST=1450, FALL_DURATION=.92;
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)), lerp=(a,b,t)=>a+(b-a)*t;
 const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const STORAGE='fruit_hop_v1';
 const FRUITS=[{id:'orange',name:'橘子',color:'#f7a34d'},{id:'lime',name:'青柠',color:'#98bd59'},{id:'peach',name:'蜜桃',color:'#efa0a0'},{id:'lemon',name:'柠檬',color:'#e1c04c'},{id:'blueberry',name:'蓝莓',color:'#8b94d0'},{id:'melon',name:'西瓜',color:'#6eb082'}];
 const DEFAULTS={sound:true,volume:55,assist:true,haptic:true,quality:'auto',fps:true,autoBest:true,betaUI:false,fruit:'orange'};
-let saved={settings:{...DEFAULTS},best:0,hellBest:0,daily:{},runs:0,records:[]},canStore=true;
-try{const raw=localStorage.getItem(STORAGE);if(raw){const o=JSON.parse(raw);if(o&&typeof o==='object'){saved.settings={...DEFAULTS,...(o.settings||{})};saved.best=Number.isFinite(o.best)?Math.max(0,o.best):0;saved.hellBest=Number.isFinite(o.hellBest)?Math.max(0,o.hellBest):0;saved.runs=Number.isFinite(o.runs)?Math.max(0,o.runs):0;saved.daily=o.daily&&typeof o.daily==='object'&&!Array.isArray(o.daily)?o.daily:{};saved.records=Array.isArray(o.records)?o.records.filter(r=>r&&Number.isFinite(r.score)&&typeof r.date==='string').slice(0,80):[];}}}catch(_){canStore=false;}
+let saved={settings:{...DEFAULTS},best:0,hellBest:0,mythBest:0,daily:{},runs:0,mythRuns:0,records:[]},canStore=true;
+try{const raw=localStorage.getItem(STORAGE);if(raw){const o=JSON.parse(raw);if(o&&typeof o==='object'){saved.settings={...DEFAULTS,...(o.settings||{})};saved.best=Number.isFinite(o.best)?Math.max(0,o.best):0;saved.hellBest=Number.isFinite(o.hellBest)?Math.max(0,o.hellBest):0;saved.mythBest=Number.isFinite(o.mythBest)?Math.max(0,o.mythBest):0;saved.runs=Number.isFinite(o.runs)?Math.max(0,o.runs):0;saved.mythRuns=Number.isFinite(o.mythRuns)?Math.max(0,o.mythRuns):0;saved.daily=o.daily&&typeof o.daily==='object'&&!Array.isArray(o.daily)?o.daily:{};saved.records=Array.isArray(o.records)?o.records.filter(r=>r&&Number.isFinite(r.score)&&typeof r.date==='string').slice(0,80):[];}}}catch(_){canStore=false;}
 const settings=saved.settings;
 saved.hellBest=Number.isFinite(saved.hellBest)?Math.max(0,saved.hellBest):0;
+saved.mythBest=Number.isFinite(saved.mythBest)?Math.max(0,saved.mythBest):0;
+saved.mythRuns=Number.isFinite(saved.mythRuns)?Math.max(0,saved.mythRuns):0;
 if(!FRUITS.some(f=>f.id===settings.fruit))settings.fruit='orange';
 if(!['auto','low','high'].includes(settings.quality))settings.quality='auto';
 settings.volume=clamp(Number(settings.volume)||0,0,100);
@@ -154,11 +158,11 @@ function seeded(seed){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul
 function randomSeed(){try{return crypto.getRandomValues(new Uint32Array(1))[0];}catch(_){return(Date.now()^Math.random()*0xffffffff)>>>0;}}
 const screens={home:$('home-screen'),pause:$('pause-screen'),over:$('over-screen'),settings:$('settings-screen'),help:$('help-screen'),records:$('records-screen')};
 const scoreEl=$('score'),fillEl=$('charge-fill'),tickEl=$('charge-tick'),targetEl=$('charge-target'),holdEl=$('hold-text');
-let screen='home',screenReturn='home',mode='classic',hellMode=false,gameState='ready',active=false;
+let screen='home',screenReturn='home',mode='classic',hellMode=false,mythMode=false,gameState='ready',active=false;
 let W=0,H=0,S=1,DPR=1,bgGradient=null,autoRatio=2,artVersion=0,renderDirty=true;
 let camX=0,camZ=0,anchorX=0,anchorY=0,worldTime=0,lastFrame=0,elapsedForFPS=0,framesForFPS=0,fps=60,frameAverage=16.67,slowSeconds=0,qualityCooldown=0;
 let rng=seeded(42),platforms=[],current=0,score=0,combo=0,maxCombo=0,jumps=0,perfectCount=0,runDate=dateKey(),runBestBefore=0,recorded=false,assistUsed=false;
-let player={x:0,z:0,h:TOP,rot:0},charge=0,chargeStartedAt=0,jump=null,fallTime=0,overDelay=0,landBounce=0,trailTimer=0;
+let player={x:0,z:0,h:TOP,rot:0},charge=0,chargeStartedAt=0,jump=null,fallTime=0,overDelay=0,landBounce=0,trailTimer=0,fallStartX=0,fallStartZ=0,fallDriftX=0,fallDriftZ=0,fallRotation=0;
 let pointerID=null,keyHeld=false,toastTimer=0,recordTab='classic',shake=0,shakeX=0,shakeY=0,homeBias=1,lastHoldText='';
 const cameraTarget={x:0,z:0};
 const audio={ctx:null,master:null,chargeOsc:null,chargeGain:null,noise:null};
@@ -228,7 +232,7 @@ function updateSettings(){
  if(audio.master&&audio.ctx)audio.master.gain.setTargetAtTime(settings.sound?settings.volume/100*.32:0,audio.ctx.currentTime,.03);
  if(!settings.sound)stopHum();
  setText($('daily-date'),dateKey().slice(5).replace('-',' / ')+' · 固定航线');
- setText($('header-best'),active&&mode==='daily'?Math.max(score,dailyInfo(runDate).best):Math.max(active?score:0,saved.best));updateChargeTarget();
+ setText($('header-best'),active&&mode==='daily'?Math.max(score,dailyInfo(runDate).best):active&&mythMode?Math.max(score,saved.mythBest):active&&hellMode?Math.max(score,saved.hellBest):Math.max(active?score:0,saved.best));updateChargeTarget();
 }
 function effectiveRatio(){const ratio=window.devicePixelRatio||1;return settings.quality==='low'?Math.min(ratio,1.2):settings.quality==='high'?Math.min(ratio,2.5):Math.min(ratio,autoRatio);}
 function resize(){
@@ -256,28 +260,30 @@ let lastDirection=0,sameDirection=0;
 // The first 300 points use the original, forgiving spacing and platform sizes.
 // Difficulty ramps only after that threshold, based on the score already earned.
 function hellMultiplier(points=score){return 20+Math.min(80,Math.floor(Math.max(0,points)/3));}
-function difficultyLevel(points=score){if(hellMode)return clamp((hellMultiplier(points)-20)/80,0,1);return points<=300?0:Math.pow(clamp((points-300)/520,0,1),.62);}
+function mythMultiplier(points=score){return 200+Math.min(800,Math.floor(Math.max(0,points)/2));}
+function maxJumpDistance(){return mythMode?MYTH_MAX_DIST:MAX_DIST;}
+function difficultyLevel(points=score){if(mythMode)return clamp((mythMultiplier(points)-200)/800,0,1);if(hellMode)return clamp((hellMultiplier(points)-20)/80,0,1);return points<=300?0:Math.pow(clamp((points-300)/520,0,1),.62);}
 function addPlatform(){
  const last=platforms[platforms.length-1],i=last.index+1;
  let dir=rng()>.5?1:0;if(i===1)dir=0;if(sameDirection>=2)dir=1-lastDirection;
  sameDirection=dir===lastDirection?sameDirection+1:1;lastDirection=dir;
  const difficulty=difficultyLevel();
- const distance=hellMode?230+rng()*130+difficulty*(100+rng()*210):154+rng()*63+difficulty*(52+rng()*118);
- const half=hellMode?Math.max(14,40+(rng()-.5)*8-difficulty*26):Math.max(22,56+(rng()-.5)*9-difficulty*32);
+ const distance=mythMode?510+rng()*360+difficulty*(300+rng()*500):hellMode?230+rng()*130+difficulty*(100+rng()*210):154+rng()*63+difficulty*(52+rng()*118);
+ const half=mythMode?Math.max(10,25+(rng()-.5)*7-difficulty*17):hellMode?Math.max(14,40+(rng()-.5)*8-difficulty*26):Math.max(22,56+(rng()-.5)*9-difficulty*32);
  const x=last.x-(dir===0?distance:0),z=last.z-(dir===1?distance:0);
  const kind=i%7===0?'bonus':'normal',color=kind==='bonus'?{top:'#f5e9a9',edge:'#fff7d0',side:'#d6ca8d',dark:'#bfba80'}:palette[Math.floor(rng()*palette.length)];
  platforms.push(buildPlatform(i,x,z,half,rng()>.66?'round':'square',kind,color));
 }
 function startRun(newMode='classic',preview=false,hell=false){
- stopHum();cancelInput();mode=newMode;hellMode=!!hell&&!preview;runDate=dateKey();runID=globalThis.crypto?.randomUUID?.()||null;runStartedAt=performance.now();window.dispatchEvent(new CustomEvent('fruit-hop:start'));rng=seeded(preview?90731:mode==='daily'?hash('fruit-hop-v1:'+runDate):randomSeed());
+ stopHum();cancelInput();mode=newMode;hellMode=!!hell&&!preview&&newMode!=='myth';mythMode=!preview&&newMode==='myth';runDate=dateKey();runID=globalThis.crypto?.randomUUID?.()||null;runStartedAt=performance.now();window.dispatchEvent(new CustomEvent('fruit-hop:start'));rng=seeded(preview?90731:mode==='daily'?hash('fruit-hop-v1:'+runDate):mode==='myth'?hash('fruit-hop-myth-v1:'+runDate):randomSeed());
  platforms=[buildPlatform(0,0,0,61,'square','normal',palette[0])];lastDirection=0;sameDirection=0;for(let i=0;i<5;i++)addPlatform();
  current=0;score=0;combo=0;maxCombo=0;jumps=0;perfectCount=0;charge=0;jump=null;landBounce=0;fallTime=0;overDelay=0;shake=0;recorded=false;assistUsed=!preview&&settings.assist;
- player={x:0,z:0,h:TOP,rot:0};runBestBefore=hellMode?saved.hellBest:mode==='daily'?dailyInfo(runDate).best:saved.best;
+ player={x:0,z:0,h:TOP,rot:0};runBestBefore=mythMode?saved.mythBest:hellMode?saved.hellBest:mode==='daily'?dailyInfo(runDate).best:saved.best;
  for(const p of particles)p.life=0;for(const r of ripples)r.life=0;for(const l of labels)l.life=0;
  camX=platforms[1].x*.18;camZ=platforms[1].z*.18;
  active=!preview;gameState='ready';anchorX=W*(preview?(W<=700&&H>W?.55:.72):.5);anchorY=H*(preview?(W<=700&&H>W?.42:.65):.65);
  showScreen(preview?'home':null);updateHUD();updateSettings();setHold('按住屏幕蓄力 · 松手跳跃');resetChargeUI();
- if(!preview){initAudio();sound('click');live(hellMode?`地狱模式 ×${hellMultiplier()} 开始。按住蓄力，松开跳跃。`:mode==='daily'?'每日挑战开始。按住蓄力，松开跳跃。':'游戏开始。按住蓄力，松开跳跃。');if(!canStore)toast('浏览器未允许本地存储，本次纪录可能无法保存。');}
+ if(!preview){initAudio();sound('click');live(mythMode?`神话模式 ×${mythMultiplier()} 开始。按住蓄力，松开跳跃。`:hellMode?`地狱模式 ×${hellMultiplier()} 开始。按住蓄力，松开跳跃。`:mode==='daily'?'每日挑战开始。按住蓄力，松开跳跃。':'游戏开始。按住蓄力，松开跳跃。');if(!canStore)toast('浏览器未允许本地存储，本次纪录可能无法保存。');}
 }
 function showScreen(name){
  screen=name;renderDirty=true;for(const [key,el] of Object.entries(screens))el.hidden=key!==name;
@@ -294,14 +300,14 @@ function showScreen(name){
 }
 function pause(){if(!active||screen!==null||gameState==='dead')return;cancelCharge();setText($('pause-score'),score);showScreen('pause');stopHum();live('游戏已暂停。');}
 function resume(){if(!active||gameState==='dead')return;showScreen(null);initAudio();lastFrame=performance.now();setHold('按住屏幕蓄力 · 松手跳跃');updateChargeTarget();}
-function openModal(name){if(screen===name)return;if(active&&gameState==='dead'&&screen===null){overDelay=0;showResult();}if(active&&screen===null){cancelCharge();screenReturn='pause';setText($('pause-score'),score);}else screenReturn=screen||'home';stopHum();if(name==='records'){recordTab=mode==='daily'&&active?'daily':'classic';renderRecords();}updateSettings();showScreen(name);}
+function openModal(name){if(screen===name)return;if(active&&gameState==='dead'&&screen===null){overDelay=0;showResult();}if(active&&screen===null){cancelCharge();screenReturn='pause';setText($('pause-score'),score);}else screenReturn=screen||'home';stopHum();if(name==='records'){recordTab=mode==='daily'&&active?'daily':mode==='myth'&&active?'myth':'classic';renderRecords();}updateSettings();showScreen(name);}
 function closeModal(){showScreen(screenReturn||'home');screenReturn='home';}
 function goHome(){if(active&&!recorded&&jumps>0)recordRun(true);active=false;startRun('classic',true);}
 function cancelInput(){if(pointerID!==null){try{canvas.releasePointerCapture(pointerID);}catch(_){}pointerID=null;}keyHeld=false;}
 function cancelCharge(){cancelInput();if(gameState==='charging'){gameState='ready';charge=0;resetChargeUI();}stopHum();}
 function beginCharge(){if(!active||screen!==null||gameState!=='ready')return false;initAudio();gameState='charging';charge=0;chargeStartedAt=performance.now();startHum();setHold('再按一会儿……松手就起跳');tickEl.hidden=false;return true;}
-function chargeDistance(q){return MIN_DIST+(MAX_DIST-MIN_DIST)*Math.pow(clamp(q,0,1),1.14);}
-function distanceCharge(d){return Math.pow(clamp((d-MIN_DIST)/(MAX_DIST-MIN_DIST),0,1),1/1.14);}
+function chargeDistance(q){const max=maxJumpDistance();return MIN_DIST+(max-MIN_DIST)*Math.pow(clamp(q,0,1),1.14);}
+function distanceCharge(d){const max=maxJumpDistance();return Math.pow(clamp((d-MIN_DIST)/(max-MIN_DIST),0,1),1/1.14);}
 function currentPlatform(){return platforms.find(p=>p.index===current);}
 function nextPlatform(){return platforms.find(p=>p.index===current+1);}
 function aim(){const p=nextPlatform();if(!p)return {x:-1,z:0,distance:180};const dx=p.x-player.x,dz=p.z-player.z,d=Math.hypot(dx,dz)||1;return {x:dx/d,z:dz/d,distance:d};}
@@ -309,7 +315,7 @@ function releaseCharge(){
  if(screen!==null||gameState!=='charging')return;
  charge=Math.min(MAX_CHARGE,(performance.now()-chargeStartedAt)/1000);
  const q=clamp(charge/MAX_CHARGE,0,1),dir=aim(),d=chargeDistance(q);
- stopHum();jump={x:player.x,z:player.z,dx:dir.x*d,dz:dir.z*d,distance:d,time:0,duration:.44+d/MAX_DIST*.24,arc:73+d*.20};
+ stopHum();jump={x:player.x,z:player.z,dx:dir.x*d,dz:dir.z*d,distance:d,time:0,duration:.44+d/maxJumpDistance()*.24,arc:73+d*.20};
  gameState='jumping';landBounce=0;trailTimer=0;charge=0;resetChargeUI();setHold('乘着海风，出发！');sound('jump');
 }
 function resetChargeUI(){fillEl.style.transform='scaleX(0)';fillEl.style.background='#2b7453';tickEl.hidden=true;}
@@ -322,7 +328,7 @@ function updateChargeTarget(){
 function setHold(s){if(s!==lastHoldText){lastHoldText=s;setText(holdEl,s);}}
 function perfectRadius(p){return Math.min(15,p.half*.27);}
 function contains(p,x,z){const dx=Math.abs(x-p.x),dz=Math.abs(z-p.z);if(p.shape==='round')return dx*dx+dz*dz<=(p.half-1)*(p.half-1);const inner=p.half-12;if(dx>p.half-1||dz>p.half-1)return false;if(dx<=inner||dz<=inner)return true;return (dx-inner)**2+(dz-inner)**2<=121;}
-function updateHUD(){setText(scoreEl,String(score).padStart(2,'0'));setText($('stat-jumps'),jumps);setText($('stat-perfect'),perfectCount);$('combo-tag').hidden=combo<2;setText($('combo-number'),'×'+combo);const d=difficultyLevel();const base=hellMode?`地狱模式 · 难度 ×${hellMultiplier()}`:mode==='daily'?'每日挑战 · '+runDate.slice(5).replace('-',' / '):'经典航线 · 自由跳跃';setText($('mode-tag'),!hellMode&&d>0?`${base} · 难度 ${Math.round(d*100)}%`:base);setText($('header-best'),hellMode?Math.max(score,saved.hellBest):mode==='daily'?Math.max(score,dailyInfo(runDate).best):Math.max(score,saved.best));}
+function updateHUD(){setText(scoreEl,String(score).padStart(2,'0'));setText($('stat-jumps'),jumps);setText($('stat-perfect'),perfectCount);$('combo-tag').hidden=combo<2;setText($('combo-number'),'×'+combo);const d=difficultyLevel();const base=mythMode?`神话模式 · 难度 ×${mythMultiplier()}`:hellMode?`地狱模式 · 难度 ×${hellMultiplier()}`:mode==='daily'?'每日挑战 · '+runDate.slice(5).replace('-',' / '):'经典航线 · 自由跳跃';setText($('mode-tag'),(!mythMode&&!hellMode&&d>0)?`${base} · 难度 ${Math.round(d*100)}%`:base);setText($('header-best'),mythMode?Math.max(score,saved.mythBest):hellMode?Math.max(score,saved.hellBest):mode==='daily'?Math.max(score,dailyInfo(runDate).best):Math.max(score,saved.best));}
 function addLabel(x,z,text,sub='',color='#315e43'){const l=labels.find(p=>p.life<=0)||labels[0];Object.assign(l,{life:1.35,max:1.35,x,z,h:TOP+77,text,sub,color});}
 function burst(x,z,type,count){
  if(settings.quality==='low')count=Math.ceil(count*.5);if(settings.betaUI&&settings.quality!=='low')count=Math.ceil(count*1.35);if(reduced)count=Math.min(count,5);
@@ -354,31 +360,32 @@ function land(){
    updateHUD();scoreEl.classList.remove('bump');void scoreEl.offsetWidth;scoreEl.classList.add('bump');updateChargeTarget();setHold(jumps<3?'继续按住 · 向下一块小岛出发':'按住蓄力 · 松手跳跃');live(`${perfect?'靶心命中，':''}得分 ${score}，成功跳跃 ${jumps} 次。`);
   }else if(p.index===current){combo=0;updateHUD();sound('land');addLabel(player.x,player.z,'还在这座岛','再蓄力一点','#667b5a');updateChargeTarget();setHold('这次再多按一会儿');}
   else {combo=0;updateHUD();updateChargeTarget();sound('land');setHold('按住蓄力 · 瞄准下一块小岛');}
- }else{gameState='falling';fallTime=0;setHold('糟糕，脚下是水……');}
+ }else{gameState='falling';fallTime=0;fallStartX=player.x;fallStartZ=player.z;fallDriftX=jump.dx*.22;fallDriftZ=jump.dz*.22;fallRotation=(jump.dx>jump.dz?-1:1)*(.72+Math.random()*.34);player.rot=0;setHold('糟糕，脚下是水……');}
 }
-function splash(){gameState='dead';stopHum();cancelInput();player.h=-10;overDelay=.85;burst(player.x,player.z,2,38);ripple(player.x,player.z,true);const r=ripples.find(v=>v.life<=0);if(r)Object.assign(r,{life:1.6,max:1.6,x:player.x+4,z:player.z-4,r:9});shake=reduced?0:4;splashHistory++;sound('splash');vibrate([28,30,48]);$('control-hud').hidden=true;recordRun(false);live(`果子潮了。本次得分 ${score}。`);}
+function splash(){gameState='dead';stopHum();cancelInput();player.h=-8;player.rot=fallRotation*1.8;overDelay=1.05;burst(player.x,player.z,2,38);ripple(player.x,player.z,true);const r=ripples.find(v=>v.life<=0);if(r)Object.assign(r,{life:1.6,max:1.6,x:player.x+4,z:player.z-4,r:9});shake=reduced?0:5;splashHistory++;sound('splash');vibrate([28,30,48]);$('control-hud').hidden=true;recordRun(false);live(`果子潮了。本次得分 ${score}。`);}
 function recordRun(abandoned=false){
  if(recorded)return;recorded=true;
- const r={score,jumps,perfect:perfectCount,combo:maxCombo,mode,hell:hellMode,date:new Date().toISOString(),day:runDate,fruit:settings.fruit,abandoned};
- if(!abandoned&&runID)window.dispatchEvent(new CustomEvent('fruit-hop:complete',{detail:{id:runID,score,jumps,perfect:perfectCount,combo:maxCombo,mode,hell:hellMode,day:runDate,fruit:settings.fruit,duration_ms:Math.round(performance.now()-runStartedAt),assist:assistUsed}}));
+ const r={score,jumps,perfect:perfectCount,combo:maxCombo,mode,hell:hellMode,myth:mythMode,date:new Date().toISOString(),day:runDate,fruit:settings.fruit,abandoned};
+ if(!abandoned&&runID)window.dispatchEvent(new CustomEvent('fruit-hop:complete',{detail:{id:runID,score,jumps,perfect:perfectCount,combo:maxCombo,mode,hell:hellMode,myth:mythMode,day:runDate,fruit:settings.fruit,duration_ms:Math.round(performance.now()-runStartedAt),assist:assistUsed}}));
  saved.records.push(r);saved.records=saved.records.sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date));
  // Keep the 30 best classic and 30 best daily runs plus 20 most recent.
- const keep=new Set([...saved.records.filter(r=>r.mode==='classic').slice(0,30),...saved.records.filter(r=>r.mode==='daily').slice(0,30),...saved.records.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20)]);saved.records=saved.records.filter(r=>keep.has(r));
+ const keep=new Set([...saved.records.filter(r=>r.mode==='classic').slice(0,30),...saved.records.filter(r=>r.mode==='daily').slice(0,30),...saved.records.filter(r=>r.mode==='myth').slice(0,30),...saved.records.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20)]);saved.records=saved.records.filter(r=>keep.has(r));
  if(mode==='daily'){const di=dailyInfo(runDate);saved.daily[runDate]={best:Math.max(di.best,score),runs:di.runs+1};const keys=Object.keys(saved.daily).sort().reverse();for(const key of keys.slice(60))delete saved.daily[key];}
+ else if(mythMode){saved.mythBest=Math.max(saved.mythBest,score);saved.mythRuns++;saved.runs++;}
  else if(hellMode){saved.hellBest=Math.max(saved.hellBest,score);saved.runs++;}
  else{saved.best=Math.max(saved.best,score);saved.runs++;}persist();
 }
 function showResult(){
- setText($('result-score'),score);setText($('result-best'),hellMode?saved.hellBest:mode==='daily'?dailyInfo(runDate).best:saved.best);setText($('result-best-label'),hellMode?'地狱最佳':mode==='daily'?'今日最佳':'历史最佳');setText($('result-jumps'),jumps);setText($('result-combo'),maxCombo);$('new-record').hidden=score<=runBestBefore;
+ setText($('result-score'),score);setText($('result-best'),mythMode?saved.mythBest:hellMode?saved.hellBest:mode==='daily'?dailyInfo(runDate).best:saved.best);setText($('result-best-label'),mythMode?'神话最佳':hellMode?'地狱最佳':mode==='daily'?'今日最佳':'历史最佳');setText($('result-jumps'),jumps);setText($('result-combo'),maxCombo);$('new-record').hidden=score<=runBestBefore;
  const comments=score===0?'万事开头难，果子也一样。':score<10?'海水不是果汁，下次记得看准一点。':maxCombo>=5?'连击很漂亮，最后一跳有点水。':score>=30?'这趟旅程够远了，再跳一次会更远。':'只是泡了个澡，勇气还在。';setText($('result-comment'),comments);drawFruitIcon($('wet-fruit'),settings.fruit,true);$('share-fallback').hidden=true;showScreen('over');
 }
 function renderRecords(){
- const daily=recordTab==='daily',key=dateKey(),rows=saved.records.filter(r=>daily?r.mode==='daily'&&r.day===key:r.mode==='classic').sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date)).slice(0,6);
- $('classic-tab').classList.toggle('active',!daily);$('daily-tab').classList.toggle('active',daily);$('classic-tab').setAttribute('aria-selected',String(!daily));$('daily-tab').setAttribute('aria-selected',String(daily));setText($('records-best'),daily?dailyInfo(key).best:saved.best);setText($('records-runs'),daily?dailyInfo(key).runs:saved.runs);
+ const daily=recordTab==='daily',myth=recordTab==='myth',key=dateKey(),rows=saved.records.filter(r=>daily?r.mode==='daily'&&r.day===key:myth?r.mode==='myth':r.mode==='classic').sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date)).slice(0,6);
+ $('classic-tab').classList.toggle('active',!daily&&!myth);$('daily-tab').classList.toggle('active',daily);$('myth-tab').classList.toggle('active',myth);$('classic-tab').setAttribute('aria-selected',String(!daily&&!myth));$('daily-tab').setAttribute('aria-selected',String(daily));$('myth-tab').setAttribute('aria-selected',String(myth));setText($('records-best'),daily?dailyInfo(key).best:myth?saved.mythBest:saved.best);setText($('records-runs'),daily?dailyInfo(key).runs:myth?saved.mythRuns:saved.runs);
  const list=$('leaderboard');list.replaceChildren();if(!rows.length){const empty=document.createElement('div');empty.className='empty-record';empty.textContent=daily?'今天的海，等你第一个出发。':'还没有脚印。去跳出第一份纪录吧。';list.append(empty);return;}
  rows.forEach((r,i)=>{const row=document.createElement('div');row.className='leaderboard-row';const rank=document.createElement('div');rank.className='rank';rank.textContent=String(i+1).padStart(2,'0');const date=document.createElement('div');date.className='record-date';const d=new Date(r.date);date.textContent=Number.isNaN(d.getTime())?'本地记录':`${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}　${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;const sub=document.createElement('span');sub.textContent=(FRUITS.find(f=>f.id===r.fruit)?.name||'果子')+' · '+(r.jumps||0)+' 次跳跃'+(r.abandoned?' · 提前结束':'');date.append(sub);const value=document.createElement('div');value.className='record-value';value.textContent=r.score;row.append(rank,date,value);list.append(row);});
 }
-async function shareScore(){const text=`我在「果子跳跳」${mode==='daily'?'每日挑战 '+runDate:'经典航线'}拿到 ${score} 分，成功跳跃 ${jumps} 次，最高靶心连击 ${maxCombo} 次！虽然果子潮了，但下次还能更远。`;
+async function shareScore(){const route=mythMode?`神话模式 ×${mythMultiplier()}`:hellMode?`地狱模式 ×${hellMultiplier()}`:mode==='daily'?'每日挑战 '+runDate:'经典航线';const text=`我在「果子跳跳」${route}拿到 ${score} 分，成功跳跃 ${jumps} 次，最高靶心连击 ${maxCombo} 次！虽然果子潮了，但下次还能更远。`;
  if(navigator.share){try{await navigator.share({title:'果子跳跳 · 我的成绩',text});return;}catch(e){if(e.name==='AbortError')return;}}
  if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text);toast('成绩已复制，发给朋友一起挑战。');return;}catch(_){}}
  $('share-fallback').hidden=false;$('share-fallback').value=text;$('share-fallback').focus();$('share-fallback').select();try{if(document.execCommand('copy')){toast('成绩已复制，发给朋友一起挑战。');return;}}catch(_){}toast('长按或全选下方文字，即可复制成绩。');
@@ -492,12 +499,18 @@ function drawPlayer(t){
  if(gameState==='charging'){const q=clamp(charge/MAX_CHARGE,0,1);sx=1+q*.19;sy=1-q*.24;rot=reduced?0:Math.sin(t*(20+q*15))*.011*q;}
  else if(gameState==='jumping'){const u=jump.time/jump.duration;sy=1+.11*Math.sin(Math.PI*u);sx=1-.06*Math.sin(Math.PI*u);rot=Math.sin(u*TAU)*.07*(jump.dx>jump.dz?-1:1);}
  else if(landBounce>0){const b=Math.sin((1-landBounce/.28)*Math.PI)*Math.exp(-(1-landBounce/.28)*1.6);sx=1+.20*b;sy=1-.2*b;}
- if(gameState==='dead'){h=-10;baseY=worldY(player.x,player.z,h);sy=.91;rot=.2+Math.sin(t*2)*.05;}
- ctx.save();ctx.translate(x,baseY);ctx.scale(S,S);
- if(gameState==='dead'){ctx.beginPath();ctx.rect(-65,-100,130,95);ctx.clip();}
+ if(gameState==='falling'){const u=clamp(fallTime/FALL_DURATION,0,1);sx=1+.18*u;sy=1-.22*u;rot=fallRotation*(.35+u*2.2);}
+ if(gameState==='dead'){h=-8;baseY=worldY(player.x,player.z,h);sy=.78;sx=1.12;rot=fallRotation*2.5+Math.sin(t*3.2)*.08;}
+ ctx.save();ctx.globalAlpha=gameState==='falling'?1-.38*clamp(fallTime/FALL_DURATION,0,1):gameState==='dead' ? .72 : 1;ctx.translate(x,baseY);ctx.scale(S,S);
  ctx.translate(0,-29*sy);ctx.rotate(rot);ctx.scale(sx,sy);ctx.drawImage(sprites[settings.fruit],-48,-61,96,104);
  const mood=gameState==='charging'?'charge':gameState==='jumping'?'jump':['falling','dead'].includes(gameState)?'wet':'normal';drawFace(ctx,mood,t%5>4.85);ctx.restore();
- if(gameState==='dead'){ctx.strokeStyle='#e1f2df';ctx.globalAlpha=.65;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(x,worldY(player.x,player.z,0),31*S,10*S,0,.1,Math.PI-.1);ctx.stroke();ctx.globalAlpha=1;}
+ if(gameState==='falling'||gameState==='dead'){ctx.strokeStyle='#e1f2df';ctx.globalAlpha=gameState==='dead' ? .35 : .62;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(x,worldY(player.x,player.z,0),31*S,10*S,0,.1,Math.PI-.1);ctx.stroke();ctx.globalAlpha=1;}
+}
+function drawFallEffects(t){
+ if(gameState!=='falling'&&gameState!=='dead')return;const x=worldX(player.x,player.z),y=worldY(player.x,player.z,player.h),u=clamp(fallTime/FALL_DURATION,0,1);ctx.save();
+ if(gameState==='falling'){ctx.globalAlpha=(1-u)*.36;ctx.strokeStyle='#f3ffe8';ctx.lineWidth=1.5*S;for(let i=0;i<4;i++){const ox=(i-1.5)*9*S,oy=(i+1)*17*S;ctx.beginPath();ctx.moveTo(x+ox-5*S,y-oy);ctx.quadraticCurveTo(x+ox,y-oy-7*S,x+ox+5*S,y-oy-14*S);ctx.stroke();}}
+ else {const waterY=worldY(player.x,player.z,0),p=clamp(overDelay/1.05,0,1);ctx.globalAlpha=.5*p;ctx.strokeStyle='#f3ffe8';ctx.lineWidth=1.8*S;ctx.beginPath();ctx.ellipse(worldX(player.x,player.z),waterY,24*S+(1-p)*32*S,7*S+(1-p)*8*S,0,0,TAU);ctx.stroke();ctx.globalAlpha=.32*p;for(let i=0;i<5;i++){const ox=(i-2)*13*S;ctx.beginPath();ctx.moveTo(x+ox,waterY-2*S);ctx.quadraticCurveTo(x+ox+(i%2?4:-4)*S,waterY-16*S,x+ox+(i%2?7:-7)*S,waterY-23*S);ctx.stroke();}}
+ ctx.restore();
 }
 function drawParticles(){
  for(const p of particles){if(p.life<=0)continue;const alpha=clamp(p.life/Math.min(.35,p.max),0,1);ctx.globalAlpha=alpha;const x=worldX(p.x,p.z),y=worldY(p.x,p.z,p.h);ctx.fillStyle=p.color;
@@ -525,7 +538,7 @@ function step(dt){
    if(!reduced&&settings.quality!=='low'){trailTimer+=dt;if(trailTimer>(settings.betaUI?.032:.043)){trailTimer=0;const p=particles.find(v=>v.life<=0);if(p)Object.assign(p,{life:.27,max:.27,x:player.x,z:player.z,h:player.h+15,vx:0,vz:0,vh:-12,size:2.1,color:'#fffae0',type:0});}}
    if(u>=1)land();
   }else if(gameState==='falling'){
-   fallTime+=dt;const u=clamp(fallTime/.27,0,1);player.h=TOP-64*u*u;player.x+=jump.dx/jump.duration*dt*.13;player.z+=jump.dz/jump.duration*dt*.13;player.rot=u*.65*(jump.dx>jump.dz?-1:1);if(u>=1)splash();
+   fallTime+=dt;const u=clamp(fallTime/FALL_DURATION,0,1),e=easeInCubic(u);player.h=TOP-36*u-118*e;player.x=fallStartX+fallDriftX*e;player.z=fallStartZ+fallDriftZ*e;player.rot=fallRotation*(.35+u*2.2);if(u>=1)splash();
   }else if(gameState==='dead'&&overDelay>0){overDelay-=dt;if(overDelay<=0)showResult();}
  }
  // Camera anticipates the next platform, then settles without frame-rate dependence.
@@ -542,8 +555,8 @@ function render(){
  // Platforms are generated in strictly decreasing isometric depth. Reverse draw
  // keeps farther islands behind nearer ones, without sorting every frame.
  let fruitDrawn=false;const depth=player.x+player.z;
- for(let i=platforms.length-1;i>=0;i--){const p=platforms[i];if(!fruitDrawn&&p.x+p.z>depth+1&&!contains(p,player.x,player.z)){drawAim(worldTime);drawPlayer(worldTime);fruitDrawn=true;}drawPlatform(p,worldTime);}
- if(!fruitDrawn){drawAim(worldTime);drawPlayer(worldTime);}drawParticles();
+ for(let i=platforms.length-1;i>=0;i--){const p=platforms[i];if(!fruitDrawn&&p.x+p.z>depth+1&&!contains(p,player.x,player.z)){drawAim(worldTime);drawFallEffects(worldTime);drawPlayer(worldTime);fruitDrawn=true;}drawPlatform(p,worldTime);}
+ if(!fruitDrawn){drawAim(worldTime);drawFallEffects(worldTime);drawPlayer(worldTime);}drawParticles();
 }
 function frame(now){
  const raw=lastFrame?(now-lastFrame)/1000:1/60;lastFrame=now;const dt=Math.min(raw,.05);
@@ -578,7 +591,7 @@ canvas.addEventListener('contextrestored',()=>{for(const f of FRUITS)sprites[f.i
 window.addEventListener('resize',resize,{passive:true});
 window.addEventListener('pagehide',()=>{stopHum();persist();});
 function toggleSound(){settings.sound=!settings.sound;if(settings.sound)initAudio();persist();updateSettings();if(settings.sound)sound('click');}
-$('start-button').addEventListener('click',()=>startRun('classic'));$('daily-button').addEventListener('click',()=>startRun('daily'));$('hell-button').addEventListener('click',()=>startRun('classic',false,true));
+$('start-button').addEventListener('click',()=>startRun('classic'));$('daily-button').addEventListener('click',()=>startRun('daily'));$('hell-button').addEventListener('click',()=>startRun('classic',false,true));$('myth-button').addEventListener('click',()=>startRun('myth'));
 $('bridge-button').addEventListener('click',()=>{location.href='bridge.html';});
 $('pause-button').addEventListener('click',pause);$('resume-button').addEventListener('click',resume);
 $('retry-button').addEventListener('click',()=>startRun(mode,false,hellMode));$('restart-pause').addEventListener('click',()=>{if(!recorded&&jumps>0)recordRun(true);startRun(mode,false,hellMode);});
@@ -592,7 +605,7 @@ for(const b of document.querySelectorAll('[data-close]'))b.addEventListener('cli
 for(const key of ['assist','haptic','fps','autoBest','betaUI'])$('setting-'+key).addEventListener('click',()=>{settings[key]=!settings[key];if(key==='assist'&&settings.assist&&active){assistUsed=true;toast('本局已开启新手瞄准，成绩将不能上传。');}persist();updateSettings();if(key==='haptic'&&settings.haptic)vibrate(12);});
 $('setting-volume').addEventListener('input',e=>{settings.volume=Number(e.target.value);persist();updateSettings();});
 $('setting-quality').addEventListener('change',e=>{settings.quality=e.target.value;autoRatio=2;slowSeconds=0;persist();resize();updateSettings();});
-$('classic-tab').addEventListener('click',()=>{recordTab='classic';renderRecords();});$('daily-tab').addEventListener('click',()=>{recordTab='daily';renderRecords();});
+$('classic-tab').addEventListener('click',()=>{recordTab='classic';renderRecords();});$('daily-tab').addEventListener('click',()=>{recordTab='daily';renderRecords();});$('myth-tab').addEventListener('click',()=>{recordTab='myth';renderRecords();});
 $('share-button').addEventListener('click',shareScore);
 $('fullscreen-button').addEventListener('click',async()=>{try{if(document.fullscreenElement){await document.exitFullscreen();}else if(document.documentElement.requestFullscreen){await document.documentElement.requestFullscreen();}else{toast('当前浏览器不支持网页全屏，可通过浏览器菜单进入。');}}catch(_){toast('浏览器暂未允许全屏，可在浏览器菜单中开启。');}});
 document.addEventListener('fullscreenchange',()=>{setText($('fullscreen-button'),document.fullscreenElement?'退出全屏':'进入全屏');resize();});
@@ -601,13 +614,13 @@ document.addEventListener('touchmove',e=>{if(!e.target.closest('.panel'))e.preve
 buildPicker();resize();startRun('classic',true);updateSettings();requestAnimationFrame(frame);
 // Read-only diagnostics are exposed only with #debug. Normal runs contain no test UI.
 if(location.hash==='#debug')Object.defineProperty(window,'FruitHopDebug',{value:Object.freeze({
- state:()=>({screen,mode,hellMode,hellMultiplier:hellMultiplier(),gameState,score,jumps,combo,maxCombo,perfectCount,current,charge,assistUsed,betaUI:settings.betaUI,difficulty:difficultyLevel(),player:{...player},next:nextPlatform()?{x:nextPlatform().x,z:nextPlatform().z,half:nextPlatform().half,index:nextPlatform().index,shape:nextPlatform().shape}:null,platforms:platforms.map(p=>({x:p.x,z:p.z,index:p.index,half:p.half,kind:p.kind})),idealHold:distanceCharge(aim().distance)*MAX_CHARGE,fps,ratio:DPR,particles:particles.filter(p=>p.life>0).length,records:saved.records.length,canStore}),
+ state:()=>({screen,mode,hellMode,mythMode,hellMultiplier:hellMultiplier(),mythMultiplier:mythMultiplier(),gameState,score,jumps,combo,maxCombo,perfectCount,current,charge,assistUsed,betaUI:settings.betaUI,difficulty:difficultyLevel(),player:{...player},next:nextPlatform()?{x:nextPlatform().x,z:nextPlatform().z,half:nextPlatform().half,index:nextPlatform().index,shape:nextPlatform().shape}:null,platforms:platforms.map(p=>({x:p.x,z:p.z,index:p.index,half:p.half,kind:p.kind})),idealHold:distanceCharge(aim().distance)*MAX_CHARGE,fps,ratio:DPR,particles:particles.filter(p=>p.life>0).length,records:saved.records.length,canStore}),
  })});
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","spa":2}' crossorigin="anonymous"></script>
-<script src="assets/config.js?v=5500d93" defer></script>
-<script src="assets/auth.js?v=5500d93" defer></script>
-<script src="assets/cloud.js?v=5500d93" defer></script>
+<script src="assets/config.js?v=hop-myth-20261018" defer></script>
+<script src="assets/auth.js?v=hop-myth-20261018" defer></script>
+<script src="assets/cloud.js?v=hop-myth-20261018" defer></script>
 </body>
 </html>

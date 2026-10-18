@@ -74,7 +74,7 @@
   function dayKey() {const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
   async function loadBoard() {
     const ticket = ++boardSequence;
-    const mode = $('daily-tab').getAttribute('aria-selected') === 'true' ? 'daily' : 'classic';
+    const mode = $('daily-tab').getAttribute('aria-selected') === 'true' ? 'daily' : $('myth-tab').getAttribute('aria-selected') === 'true' ? 'myth' : 'classic';
     const list = $('cloud-leaderboard'); list.replaceChildren(); $('cloud-status').textContent = '正在读取云端榜单…';
     const query = new URLSearchParams({select:'player_name,score,jumps,fruit,created_at',mode:'eq.'+mode,order:'score.desc,created_at.asc',limit:'10'});
     if (mode === 'daily') query.set('day','eq.'+dayKey());
@@ -93,5 +93,5 @@
       });
     } catch (error) {if (ticket === boardSequence) $('cloud-status').textContent = error.message || '无法连接云端，本地成绩仍可查看。';}
   }
-  for (const id of ['records-button','over-records','classic-tab','daily-tab','refresh-cloud']) $(id).addEventListener('click',loadBoard);
+  for (const id of ['records-button','over-records','classic-tab','daily-tab','myth-tab','refresh-cloud']) $(id).addEventListener('click',loadBoard);
 })();
