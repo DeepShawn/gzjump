@@ -8,6 +8,7 @@ test('accepts valid completed runs, including a zero-score first fall',() => {
   assert.equal(validateSubmission({...valid,score:0,jumps:0,perfect:0,combo:0},now).score,0);
   // Two cross-island perfect jumps can score 20 points each.
   assert.equal(validateSubmission({...valid,score:40,jumps:2,perfect:2,combo:2,duration_ms:1000},now).score,40);
+  assert.equal(validateSubmission({...valid,mode:'bridge_myth'},now).mode,'bridge_myth');
 });
 test('rejects forged or inconsistent numbers, oversized names and injection markup',() => {
   for (const patch of [{score:1000},{score:-1},{score:1.5},{jumps:10001},{perfect:6},{combo:4},{combo:0},{duration_ms:0},{player_name:'<img onerror=alert(1)>'},{player_name:'x\u200by'},{player_name:'a'.repeat(21)},{status:'approved',score:999}]) {

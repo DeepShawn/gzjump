@@ -39,7 +39,7 @@ async function loadScores() {
     const row = document.createElement('tr');
     const cell = text => {const td = document.createElement('td'); td.textContent = text; row.append(td); return td;};
     const nameCell = cell(record.player_name); const time = document.createElement('small'); time.textContent = new Date(record.created_at).toLocaleString('zh-CN'); nameCell.append(time);
-    const modeLabel = {daily:'每日',bridge_daily:'搭路 · 每日',bridge_endless:'搭路 · 无尽'}[record.mode] || '经典'; cell(modeLabel + (record.mode.endsWith('daily') ? ' · '+record.day : '')); cell(String(record.score)); cell(`${record.jumps} / ${record.perfect} / ${record.combo}`); cell((record.duration_ms/1000).toFixed(1)+' 秒'); const risk = cell(record.risk_flags?.length ? record.risk_flags.join('、') + ' (' + record.risk_score + ')' : '正常'); if (record.risk_flags?.length) risk.style.color = '#934c39'; cell(labels[record.status]);
+    const modeLabel = {daily:'每日',bridge_daily:'搭路 · 每日',bridge_endless:'搭路 · 无尽',bridge_myth:'搭路 · 神话'}[record.mode] || '经典'; cell(modeLabel + (record.mode.endsWith('daily') ? ' · '+record.day : '')); cell(String(record.score)); cell(`${record.jumps} / ${record.perfect} / ${record.combo}`); cell((record.duration_ms/1000).toFixed(1)+' 秒'); const risk = cell(record.risk_flags?.length ? record.risk_flags.join('、') + ' (' + record.risk_score + ')' : '正常'); if (record.risk_flags?.length) risk.style.color = '#934c39'; cell(labels[record.status]);
     const actions = cell('');
     if (record.player_key) {
       const ban = document.createElement('button'); ban.textContent = '封禁设备'; ban.className = 'danger';

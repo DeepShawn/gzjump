@@ -10,7 +10,7 @@ export function validateSubmission(value, now = new Date()) {
   // cross-island landing doubles that jump value, and a bonus island adds a
   // separate +3 reward, so the safe per-jump ceiling is 23.
   if (jumps > 10000 || score > 100000 || score < jumps || score > jumps * 23 || perfect > jumps || combo > perfect || (perfect === 0) !== (combo === 0) || duration_ms > 86400000 || duration_ms < jumps * 200) throw new Error('成绩数值超出合理范围');
-  if (!['classic', 'daily', 'bridge_daily', 'bridge_endless'].includes(mode) || !['orange','lime','peach','lemon','blueberry','melon'].includes(fruit)) throw new Error('航线或水果无效');
+  if (!['classic', 'daily', 'bridge_daily', 'bridge_endless', 'bridge_myth'].includes(mode) || !['orange','lime','peach','lemon','blueberry','melon'].includes(fruit)) throw new Error('航线或水果无效');
   const date = typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day) ? new Date(day + 'T00:00:00Z') : null;
   if (!date || !Number.isFinite(date.getTime()) || date.toISOString().slice(0,10) !== day || Math.abs(date.getTime() - now.getTime()) > 3 * 86400000) throw new Error('仅能上传最近完成的成绩');
   return {id, player_name, score, jumps, perfect, combo, mode, day, fruit, duration_ms, device_id, assist:false};
