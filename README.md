@@ -38,6 +38,22 @@ npm test
 npm run build
 ```
 
+## 代码结构
+
+「果子搭路」源码在 `src/bridge/`，按职责拆分为 ES 模块，`npm run build:bridge` 用 esbuild 打包成 `assets/bridge.bundle.js`（提交到仓库，GitHub Pages 直接使用）。修改源码后需要重新打包并一起提交。
+
+- `constants.js`：主题、颜色、时长等调参常量
+- `rules.js`：纯逻辑（随机数、难度、路面生成、落点判定），由 `tests/bridge-rules.test.js` 覆盖
+- `storage.js`：本地设置与纪录
+- `state.js`：共享的游戏状态
+- `game.js`：对局流程与木板状态机
+- `render.js`：Canvas 绘制
+- `ui.js`：界面、HUD 与设置
+- `upload.js`：云端成绩上传
+- `main.js`：入口、输入与帧循环
+
+样式在 `assets/bridge.css`。页面地址加 `#debug` 后可在控制台读取 `FruitBridgeDebug.state()`。
+
 ## Android
 
 Android 壳应用位于 `android/`，包名为 `com.deepshawn.gzjump`，最低 API 31，目标 API 35。签名 keystore 不提交到仓库。

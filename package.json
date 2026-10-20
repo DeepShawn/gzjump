@@ -1,6 +1,6 @@
 {
   "name": "gzjump", "private": true, "type": "module",
-  "scripts": {"build": "esbuild assets/admin.js --bundle --minify --format=esm --outfile=assets/admin.bundle.js", "test": "node --test tests/*.test.js"},
+  "scripts": {"build": "npm run build:admin && npm run build:bridge", "build:admin": "esbuild assets/admin.js --bundle --minify --format=esm --outfile=assets/admin.bundle.js", "build:bridge": "esbuild src/bridge/main.js --bundle --minify --format=iife --target=es2020 --outfile=assets/bridge.bundle.js", "test": "node --test tests/*.test.js"},
   "dependencies": {"@supabase/supabase-js": "2.117.3"},
   "devDependencies": {"esbuild": "0.25.12", "@playwright/test": "1.56.1"}
 }
