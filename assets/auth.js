@@ -18,5 +18,5 @@
   $('auth-form').addEventListener('submit', async event => { event.preventDefault(); const email=$('auth-email').value.trim(), password=$('auth-password').value; const submit=$('auth-submit'); submit.disabled=true; try { const data=await request('token?grant_type=password',{email,password}); save(data); close(); } catch (error) { $('auth-status').textContent=error.message; } finally { submit.disabled=false; } });
   $('auth-signup').addEventListener('click', async () => { const email=$('auth-email').value.trim(), password=$('auth-password').value; try { const data=await request('signup',{email,password}); $('auth-status').textContent=data.session?'注册成功，已登录。':'注册成功，请查收验证邮件后登录。'; if(data.session) save(data); } catch(error) { $('auth-status').textContent=error.message; } });
   $('auth-magic').addEventListener('click', async () => { const email=$('auth-email').value.trim(); if(!email) { $('auth-status').textContent='请先填写邮箱。'; return; } try { await request('otp',{email,create_user:true}); $('auth-status').textContent='魔法登录链接已发送，请检查邮箱。'; } catch(error) { $('auth-status').textContent=error.message; } });
-  window.addEventListener('gzjump-auth-refresh', refresh); update(); verify();
+  window.addEventListener('gzjump-auth-refresh', refresh);window.addEventListener('gzjump-session-refreshed',event=>save(event.detail)); update(); verify();
 })();

@@ -124,6 +124,9 @@ body.beta-ui .primary-button:hover{background:linear-gradient(135deg,#1b5c49,#27
 </section>
 <footer class="footer"><div class="weather" id="home-weather"><span class="status-dot"></span>海面平静，适合起跳</div><div class="run-stats" id="run-stats" hidden>成功 <b id="stat-jumps">0</b> 靶心 <b id="stat-perfect">0</b></div><div class="footer-right"><button class="text-button" id="help-button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M8 7.5C8 5 13 5 12 8C11.5 9 10 9 10 11M10 14V14.1"/></svg>怎么玩</button><span class="fps" id="fps">— FPS</span></div></footer>
 <div id="auth-panel" class="auth-popover" hidden role="dialog" aria-modal="true" aria-labelledby="auth-title"><div class="auth-card"><button id="auth-close" class="auth-close" aria-label="关闭">×</button><div class="eyebrow">ACCOUNT</div><h2 id="auth-title">登录后保存成绩</h2><p id="auth-user">游客模式</p><form id="auth-form"><input id="auth-email" type="email" placeholder="邮箱" autocomplete="email" required><input id="auth-password" type="password" placeholder="密码（至少 12 位）" autocomplete="current-password" minlength="12" required><button id="auth-submit" class="primary-button" type="submit">登录</button><button id="auth-signup" class="secondary-button" type="button">注册邮箱账号</button><button id="auth-magic" class="text-button" type="button">发送魔法登录链接</button></form><button id="auth-logout" class="secondary-button" type="button" hidden>退出登录</button><p id="auth-status">游客可以直接游玩，但成绩需要管理员审核。</p></div></div><div id="toast" role="status"></div><div id="live-region" role="status" aria-live="polite"></div>
+<script src="assets/config.js?v=secure-runs-20261022"></script>
+<script src="assets/game-rules.js?v=secure-runs-20261022"></script>
+<script src="assets/run-session.js?v=secure-runs-20261022"></script>
 <script>
 'use strict';
 (() => {
@@ -167,6 +170,7 @@ let pointerID=null,keyHeld=false,toastTimer=0,recordTab='classic',shake=0,shakeX
 const cameraTarget={x:0,z:0};
 const audio={ctx:null,master:null,chargeOsc:null,chargeGain:null,noise:null};
 let splashHistory=0,runID=null,runStartedAt=0;
+let hopCourse=null,startingRun=false;
 const particles=Array.from({length:96},()=>({life:0,max:1,x:0,z:0,h:0,vx:0,vz:0,vh:0,size:2,color:'#ffffff',type:0}));
 const ripples=Array.from({length:14},()=>({life:0,max:1,x:0,z:0,r:1}));
 const labels=Array.from({length:6},()=>({life:0,max:1,x:0,z:0,h:0,text:'',sub:'',color:'#315c40'}));
@@ -264,18 +268,15 @@ function mythMultiplier(points=score){return 200+Math.min(800,Math.floor(Math.ma
 function maxJumpDistance(){return mythMode?MYTH_MAX_DIST:MAX_DIST;}
 function difficultyLevel(points=score){if(mythMode)return clamp((mythMultiplier(points)-200)/800,0,1);if(hellMode)return clamp((hellMultiplier(points)-20)/80,0,1);return points<=300?0:Math.pow(clamp((points-300)/520,0,1),.62);}
 function addPlatform(){
- const last=platforms[platforms.length-1],i=last.index+1;
- let dir=rng()>.5?1:0;if(i===1)dir=0;if(sameDirection>=2)dir=1-lastDirection;
- sameDirection=dir===lastDirection?sameDirection+1:1;lastDirection=dir;
- const difficulty=difficultyLevel();
- const distance=mythMode?510+rng()*360+difficulty*(300+rng()*500):hellMode?230+rng()*130+difficulty*(100+rng()*210):154+rng()*63+difficulty*(52+rng()*118);
- const half=mythMode?Math.max(10,25+(rng()-.5)*7-difficulty*17):hellMode?Math.max(14,40+(rng()-.5)*8-difficulty*26):Math.max(22,56+(rng()-.5)*9-difficulty*32);
- const x=last.x-(dir===0?distance:0),z=last.z-(dir===1?distance:0);
- const kind=i%7===0?'bonus':'normal',color=kind==='bonus'?{top:'#f5e9a9',edge:'#fff7d0',side:'#d6ca8d',dark:'#bfba80'}:palette[Math.floor(rng()*palette.length)];
- platforms.push(buildPlatform(i,x,z,half,rng()>.66?'round':'square',kind,color));
+ const p=hopCourse.next(score),color=p.kind==='bonus'?{top:'#f5e9a9',edge:'#fff7d0',side:'#d6ca8d',dark:'#bfba80'}:palette[p.colorIndex];
+ platforms.push(buildPlatform(p.index,p.x,p.z,p.half,p.shape,p.kind,color));
 }
-function startRun(newMode='classic',preview=false,hell=false){
+async function startRun(newMode='classic',preview=false,hell=false){
+ if(startingRun)return;let remote=null;
+ if(!preview){startingRun=true;cancelCharge();screen='loading';const b=$('start-button'),label=b.innerHTML;b.disabled=true;b.textContent='正在连接…';try{remote=await window.GZJUMP_RUN.begin(newMode,newMode==='myth'?'myth':hell?'hell':'normal',settings.fruit);}finally{startingRun=false;b.disabled=false;b.innerHTML=label;}}
  stopHum();cancelInput();mode=newMode;hellMode=!!hell&&!preview&&newMode!=='myth';mythMode=!preview&&newMode==='myth';runDate=dateKey();runID=globalThis.crypto?.randomUUID?.()||null;runStartedAt=performance.now();window.dispatchEvent(new CustomEvent('fruit-hop:start'));rng=seeded(preview?90731:mode==='daily'?hash('fruit-hop-v1:'+runDate):mode==='myth'?hash('fruit-hop-myth-v1:'+runDate):randomSeed());
+ if(remote){runID=remote.id;runDate=remote.day;}else if(!preview)toast('本局离线游玩，无法上传：'+window.GZJUMP_RUN.error());
+ score=0;hopCourse=window.GZJUMP_RULES.hopCourse(remote?.seed??(preview?90731:randomSeed()),mythMode?'myth':hellMode?'hell':'normal');
  platforms=[buildPlatform(0,0,0,61,'square','normal',palette[0])];lastDirection=0;sameDirection=0;for(let i=0;i<5;i++)addPlatform();
  current=0;score=0;combo=0;maxCombo=0;jumps=0;perfectCount=0;charge=0;jump=null;landBounce=0;fallTime=0;overDelay=0;shake=0;recorded=false;assistUsed=!preview&&settings.assist;
  player={x:0,z:0,h:TOP,rot:0};runBestBefore=mythMode?saved.mythBest:hellMode?saved.hellBest:mode==='daily'?dailyInfo(runDate).best:saved.best;
@@ -306,14 +307,14 @@ function goHome(){if(active&&!recorded&&jumps>0)recordRun(true);active=false;sta
 function cancelInput(){if(pointerID!==null){try{canvas.releasePointerCapture(pointerID);}catch(_){}pointerID=null;}keyHeld=false;}
 function cancelCharge(){cancelInput();if(gameState==='charging'){gameState='ready';charge=0;resetChargeUI();}stopHum();}
 function beginCharge(){if(!active||screen!==null||gameState!=='ready')return false;initAudio();gameState='charging';charge=0;chargeStartedAt=performance.now();startHum();setHold('再按一会儿……松手就起跳');tickEl.hidden=false;return true;}
-function chargeDistance(q){const max=maxJumpDistance();return MIN_DIST+(max-MIN_DIST)*Math.pow(clamp(q,0,1),1.14);}
+function chargeDistance(q){return window.GZJUMP_RULES.hopDistance(q*1220,mythMode?'myth':hellMode?'hell':'normal');}
 function distanceCharge(d){const max=maxJumpDistance();return Math.pow(clamp((d-MIN_DIST)/(max-MIN_DIST),0,1),1/1.14);}
 function currentPlatform(){return platforms.find(p=>p.index===current);}
 function nextPlatform(){return platforms.find(p=>p.index===current+1);}
 function aim(){const p=nextPlatform();if(!p)return {x:-1,z:0,distance:180};const dx=p.x-player.x,dz=p.z-player.z,d=Math.hypot(dx,dz)||1;return {x:dx/d,z:dz/d,distance:d};}
 function releaseCharge(){
  if(screen!==null||gameState!=='charging')return;
- charge=Math.min(MAX_CHARGE,(performance.now()-chargeStartedAt)/1000);
+ charge=Math.round(Math.min(MAX_CHARGE,(performance.now()-chargeStartedAt)/1000)*1000)/1000;window.GZJUMP_RUN.input(charge*1000);
  const q=clamp(charge/MAX_CHARGE,0,1),dir=aim(),d=chargeDistance(q);
  stopHum();jump={x:player.x,z:player.z,dx:dir.x*d,dz:dir.z*d,distance:d,time:0,duration:.44+d/maxJumpDistance()*.24,arc:73+d*.20};
  gameState='jumping';landBounce=0;trailTimer=0;charge=0;resetChargeUI();setHold('乘着海风，出发！');sound('jump');
@@ -326,8 +327,8 @@ function updateChargeTarget(){
  setText($('charge-center-label'),settings.assist?'黄色区域 = 靶心力度':'按得越久，跳得越远');
 }
 function setHold(s){if(s!==lastHoldText){lastHoldText=s;setText(holdEl,s);}}
-function perfectRadius(p){return Math.min(15,p.half*.27);}
-function contains(p,x,z){const dx=Math.abs(x-p.x),dz=Math.abs(z-p.z);if(p.shape==='round')return dx*dx+dz*dz<=(p.half-1)*(p.half-1);const inner=p.half-12;if(dx>p.half-1||dz>p.half-1)return false;if(dx<=inner||dz<=inner)return true;return (dx-inner)**2+(dz-inner)**2<=121;}
+function perfectRadius(p){return window.GZJUMP_RULES.perfectRadius(p);}
+function contains(p,x,z){return window.GZJUMP_RULES.contains(p,x,z);}
 function updateHUD(){setText(scoreEl,String(score).padStart(2,'0'));setText($('stat-jumps'),jumps);setText($('stat-perfect'),perfectCount);$('combo-tag').hidden=combo<2;setText($('combo-number'),'×'+combo);const d=difficultyLevel();const base=mythMode?`神话模式 · 难度 ×${mythMultiplier()}`:hellMode?`地狱模式 · 难度 ×${hellMultiplier()}`:mode==='daily'?'每日挑战 · '+runDate.slice(5).replace('-',' / '):'经典航线 · 自由跳跃';setText($('mode-tag'),(!mythMode&&!hellMode&&d>0)?`${base} · 难度 ${Math.round(d*100)}%`:base);setText($('header-best'),mythMode?Math.max(score,saved.mythBest):hellMode?Math.max(score,saved.hellBest):mode==='daily'?Math.max(score,dailyInfo(runDate).best):Math.max(score,saved.best));}
 function addLabel(x,z,text,sub='',color='#315e43'){const l=labels.find(p=>p.life<=0)||labels[0];Object.assign(l,{life:1.35,max:1.35,x,z,h:TOP+77,text,sub,color});}
 function burst(x,z,type,count){
@@ -366,7 +367,7 @@ function splash(){gameState='dead';stopHum();cancelInput();player.h=-8;player.ro
 function recordRun(abandoned=false){
  if(recorded)return;recorded=true;
  const r={score,jumps,perfect:perfectCount,combo:maxCombo,mode,hell:hellMode,myth:mythMode,date:new Date().toISOString(),day:runDate,fruit:settings.fruit,abandoned};
- if(!abandoned&&runID)window.dispatchEvent(new CustomEvent('fruit-hop:complete',{detail:{id:runID,score,jumps,perfect:perfectCount,combo:maxCombo,mode,hell:hellMode,myth:mythMode,day:runDate,fruit:settings.fruit,duration_ms:Math.round(performance.now()-runStartedAt),assist:assistUsed}}));
+ if(!abandoned&&runID)window.dispatchEvent(new CustomEvent('fruit-hop:complete',{detail:window.GZJUMP_RUN.complete({id:runID,score,jumps,perfect:perfectCount,combo:maxCombo,mode,hell:hellMode,myth:mythMode,day:runDate,fruit:settings.fruit,duration_ms:Math.round(performance.now()-runStartedAt),assist:assistUsed})}));
  saved.records.push(r);saved.records=saved.records.sort((a,b)=>b.score-a.score||b.date.localeCompare(a.date));
  // Keep the 30 best classic and 30 best daily runs plus 20 most recent.
  const keep=new Set([...saved.records.filter(r=>r.mode==='classic').slice(0,30),...saved.records.filter(r=>r.mode==='daily').slice(0,30),...saved.records.filter(r=>r.mode==='myth').slice(0,30),...saved.records.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20)]);saved.records=saved.records.filter(r=>keep.has(r));
@@ -619,8 +620,7 @@ if(location.hash==='#debug')Object.defineProperty(window,'FruitHopDebug',{value:
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","spa":2}' crossorigin="anonymous"></script>
-<script src="assets/config.js?v=hop-myth-20261018" defer></script>
-<script src="assets/auth.js?v=hop-myth-20261018" defer></script>
-<script src="assets/cloud.js?v=hop-myth-20261018" defer></script>
+<script src="assets/auth.js?v=secure-runs-20261022" defer></script>
+<script src="assets/cloud.js?v=secure-runs-20261022" defer></script>
 </body>
 </html>

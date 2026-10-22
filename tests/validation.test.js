@@ -8,7 +8,7 @@ test('accepts valid completed runs, including a zero-score first fall',() => {
   assert.equal(validateSubmission({...valid,score:0,jumps:0,perfect:0,combo:0},now).score,0);
   // Two cross-island perfect jumps can score 20 points each.
   assert.equal(validateSubmission({...valid,score:40,jumps:2,perfect:2,combo:2,duration_ms:1000},now).score,40);
-  assert.equal(validateSubmission({...valid,mode:'bridge_myth'},now).mode,'bridge_myth');
+  assert.equal(validateSubmission({...valid,score:8,mode:'bridge_myth'},now).mode,'bridge_myth');
   assert.equal(validateSubmission({...valid,mode:'myth'},now).mode,'myth');
 });
 test('rejects forged or inconsistent numbers, oversized names and injection markup',() => {
@@ -22,4 +22,9 @@ test('rejects malformed, impossible, stale or future dates and unknown modes',()
 test('removes caller-supplied moderation and timestamp fields',() => {
   const result = validateSubmission({...valid,status:'approved',created_at:'2000-01-01'},now);
   assert.equal(result.status,undefined); assert.equal(result.created_at,undefined);
+});
+test('rejects the reported ten-thousand-point forgery in both games',()=>{
+  for(const mode of ['classic','daily','myth','bridge_endless','bridge_daily','bridge_myth']){
+    assert.throws(()=>validateSubmission({...valid,mode,score:10000,jumps:470,perfect:88,combo:31,duration_ms:480000},now));
+  }
 });

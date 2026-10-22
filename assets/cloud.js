@@ -2,8 +2,8 @@
   const config = window.GZJUMP_CONFIG;
   const apiKey = config.publishableKey || config.anonKey;
   const $ = id => document.getElementById(id);
-  let completed = null, uploading = false, sequence = 0, boardSequence = 0, deviceId = null;
-  try { deviceId = localStorage.getItem('gzjump_device_id'); } catch (_) {}
+  let completed = null, uploading = false, sequence = 0, boardSequence = 0, deviceId = window.GZJUMP_RUN?.deviceId || null;
+  if (!deviceId) try { deviceId = localStorage.getItem('gzjump_device_id'); } catch (_) {}
   if (!deviceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(deviceId)) { deviceId = crypto.randomUUID(); try { localStorage.setItem('gzjump_device_id', deviceId); } catch (_) {} }
   const button = $('upload-score'), status = $('upload-status'), name = $('player-name');
   try {name.value = localStorage.getItem('gzjump_player_name') || '';} catch (_) {}
@@ -31,7 +31,9 @@
   });
   window.addEventListener('fruit-hop:complete', event => {
     completed = Object.freeze({...event.detail});
-    if (completed.assist) {
+    if (completed.run_error) {
+      button.disabled=true;status.textContent='本局离线，成绩已保存到本地：'+completed.run_error;
+    } else if (completed.assist) {
       button.disabled = true;
       status.textContent = '本局开启了靶心辅助，成绩已自动拒绝上传。请关闭辅助并重新开始一局。';
       window.alert('成绩上传已拒绝：本局开启了“靶心辅助验证”。请关闭辅助后重新开始一局。');
@@ -47,7 +49,7 @@
     }
   });
   async function submitCompleted(auto = false) {
-    if (!completed || completed.assist || uploading) return;
+    if (!completed || completed.assist || completed.run_error || uploading) return;
     const player_name = name.value.trim();
     if (!player_name || [...player_name].length > 20 || /[\p{Cc}\p{Cf}<>]/u.test(player_name)) {
       status.textContent = '请输入 1–20 个字符的昵称，不能含控制字符或尖括号。'; name.focus(); return;
@@ -56,7 +58,7 @@
     uploading = true; button.disabled = true; status.textContent = auto ? '正在自动上传…' : '正在上传…';
     try {
       const response = await fetch(config.url + '/functions/v1/gzjump-submit', {
-        method:'POST', headers:{apikey:apiKey, Authorization:'Bearer ' + (authToken() || apiKey), 'Content-Type':'application/json'},
+        method:'POST', headers:{apikey:apiKey, Authorization:'Bearer ' + (await window.GZJUMP_RUN.token() || apiKey), 'Content-Type':'application/json'},
         body:JSON.stringify({...snapshot, player_name, device_id:deviceId}), signal:AbortSignal.timeout(15000)
       });
       const data = await response.json();
