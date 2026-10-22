@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src https://beasxxexggnjcocdbtdl.supabase.co; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
-<title>成绩管理 · 果子跳跳</title><link rel="stylesheet" href="assets/admin.css">
-<script src="assets/config.js" defer></script><script src="assets/admin.bundle.js" type="module"></script>
+<title>成绩管理 · 果子跳跳</title><link rel="stylesheet" href="assets/admin.css?v=bulk-20261022">
+<script src="assets/config.js" defer></script><script src="assets/admin.bundle.js?v=bulk-20261022" type="module"></script>
 </head>
 <body><main>
 <header><div><span class="eyebrow">FRUIT HOP / ADMIN</span><h1>成绩管理</h1><p>审核每一份，跳过海的成绩。</p></div><a href="./">返回游戏 ↗</a></header>
@@ -17,9 +17,10 @@
 <section id="dashboard" hidden>
 <div class="toolbar card"><span id="identity"></span><button id="logout" class="secondary">退出登录</button></div>
 <div class="toolbar"><label>审核状态<select id="filter"><option value="pending">待审核</option><option value="approved">已通过</option><option value="rejected">已拒绝</option><option value="all">全部</option></select></label><button id="refresh" class="secondary">刷新</button></div>
-<div class="card table-wrap"><table><thead><tr><th>昵称 / 时间</th><th>航线</th><th>成绩</th><th>跳跃 / 靶心 / 连击</th><th>时长</th><th>风险</th><th>状态</th><th>操作</th></tr></thead><tbody id="scores"></tbody></table><p id="empty" hidden>暂无该状态的成绩。</p></div>
+<div class="bulk-toolbar card" role="group" aria-label="批量管理成绩"><div class="bulk-selection"><span id="selection-count" role="status" aria-live="polite">已选择 0 条</span><button id="clear-selection" type="button" class="secondary" disabled>取消选择</button></div><div class="actions"><button id="bulk-approve" type="button" disabled>批量通过</button><button id="bulk-reject" type="button" class="secondary" disabled>批量拒绝</button><button id="bulk-delete" type="button" class="danger" disabled>批量删除</button></div><p class="hint">在列表中勾选成绩，可全选当前页（每页最多 25 条）。切换筛选、翻页或刷新会清空选择。</p></div>
+<div class="card table-wrap"><table><thead><tr><th class="selection-cell"><label class="select-all-label"><input id="select-all" type="checkbox" aria-label="全选当前页成绩" disabled><span>全选本页</span></label></th><th>昵称 / 时间</th><th>航线</th><th>成绩</th><th>跳跃 / 靶心 / 连击</th><th>时长</th><th>风险</th><th>状态</th><th>操作</th></tr></thead><tbody id="scores"></tbody></table><p id="empty" hidden>暂无该状态的成绩。</p></div>
 <div class="pagination"><button id="previous" class="secondary">上一页</button><span id="page-label"></span><button id="next" class="secondary">下一页</button></div>
-<p class="hint">成绩由浏览器提交。数值校验和限流不能证明游戏真实性，请结合得分、跳跃和时长审核异常成绩。</p>
+<p class="hint">批量操作同样需要管理员权限，审核和删除会同步云端榜单。对局回放校验不能证明操作者是真人，请结合风险标记与实际情况审核。</p>
 </section>
 <noscript>请开启 JavaScript 以使用管理员页面。</noscript>
 </main></body></html>
